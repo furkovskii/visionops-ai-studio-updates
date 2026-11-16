@@ -3,8 +3,8 @@ on:
   push:
     branches: [main]
     paths:
+      - 'release-input/*.zip'
       - 'VisionOps_AI_Studio/**'
-      - '.github/workflows/publish-visionops.yml'
   workflow_dispatch:
 
 permissions:
@@ -18,53 +18,62 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Get project
+      - name: Checkout update source
         uses: actions/checkout@v4
-      - name: Validate and package
-        id: package
+      - name: Validate package and determine version
+        id: build
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json, re, hashlib, zipfile, os
+          import os,json,re,hashlib,zipfile
           from pathlib import Path
-          root=Path('VisionOps_AI_Studio')
-          required=['app.py','security.py','update_manager.py','studio.py','version.json','templates/index.html']
-          for path in required:
-              if not (root/path).is_file(): raise SystemExit('MISSING '+path)
-          version=json.loads((root/'version.json').read_text(encoding='utf-8'))['version']
-          if not re.fullmatch(r'\d+\.\d+\.\d+',version): raise SystemExit('Invalid version')
-          allow={'.py','.pyw','.json','.txt','.css','.js','.html','.ico'}
-          forbidden={'.env','.sqlite','.db','.pem','.key'}
-          files=[]
-          for path in sorted(root.rglob('*')):
-              if not path.is_file(): continue
-              if path.name in forbidden or any(x in path.parts for x in ['.venv','__pycache__','.git']):
-                  raise SystemExit('Forbidden path: '+str(path))
-              if path.suffix.lower() not in allow: raise SystemExit('Unexpected file: '+str(path))
-              content=path.read_bytes()
-              if any(x in content for x in [b'sb_secret_',b'service_role=',b'-----BEGIN PRIVATE KEY-----']):
-                  raise SystemExit('Potential private credential in '+str(path))
-              files.append(path)
-          with zipfile.ZipFile('VisionOps_AI_Studio_update.zip','w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as z:
-              for path in files: z.write(path, path.as_posix())
+          allowed={'app.py','security.py','update_manager.py','studio.py','launcher.pyw','version.json','requirements.txt','VisionOps.ico','templates/index.html','templates/login.html','static/dashboard.css','static/dashboard.js'}
+          required={'app.py','version.json','templates/index.html','security.py','update_manager.py'}
+          published=[]
+          for package in sorted(Path('release-input').glob('*.zip')) if Path('release-input').exists() else []:
+              with zipfile.ZipFile(package) as z:
+                  names=[name for name in z.namelist() if not name.endswith('/')]
+                  rel=[n.split('VisionOps_AI_Studio/',1)[-1] for n in names]
+                  if len(set(rel))!=len(rel) or not required.issubset(set(rel)) or not set(rel).issubset(allowed):
+                      raise SystemExit('Invalid package layout: '+str(package))
+                  version=json.loads(z.read(names[rel.index('version.json')]))['version']
+                  if not re.fullmatch(r'\d+\.\d+\.\d+',version) or package.stem!='v'+version:
+                      raise SystemExit('Version filename mismatch: '+str(package))
+                  if any(z.getinfo(n).file_size>20_000_000 for n in names):
+                      raise SystemExit('Overlarge package entry')
+              published.append((version,package))
+          if not published:
+              root=Path('VisionOps_AI_Studio')
+              if not (root/'version.json').exists(): raise SystemExit('No release-input/*.zip or VisionOps_AI_Studio source found')
+              import zipfile
+              version=json.loads((root/'version.json').read_text(encoding='utf-8'))['version']
+              if not re.fullmatch(r'\d+\.\d+\.\d+',version): raise SystemExit('Invalid version')
+              with zipfile.ZipFile('package-from-source.zip','w',zipfile.ZIP_DEFLATED) as z:
+                  for path in sorted(root.rglob('*')):
+                      if path.is_file() and path.relative_to(root).as_posix() in allowed:
+                          z.write(path, path.as_posix())
+              published=[(version,Path('package-from-source.zip'))]
+          # Pick newest semver; older releases are not automatically republished
+          version,package=max(published,key=lambda x:tuple(map(int,x[0].split('.'))))
+          import shutil
+          shutil.copyfile(package,'VisionOps_AI_Studio_update.zip')
           digest=hashlib.sha256(Path('VisionOps_AI_Studio_update.zip').read_bytes()).hexdigest()
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:
-              out.write('tag=v'+version+'\n')
-              out.write('sha256='+digest+'\n')
-          print('Package',version,'files',len(files),'SHA256',digest)
+              out.write('tag=v'+version+'\nsha256='+digest+'\n')
+          print('Prepared v'+version,'sha256:',digest)
           PY
-      - name: Publish or repair release
-        shell: bash
+      - name: Upload to existing release or publish new one
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.package.outputs.tag }}
-          HASH: ${{ steps.package.outputs.sha256 }}
+          TAG: ${{ steps.build.outputs.tag }}
+          HASH: ${{ steps.build.outputs.sha256 }}
+        shell: bash
         run: |
           set -euo pipefail
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" VisionOps_AI_Studio_update.zip --clobber
           else
-            gh release create "$TAG" VisionOps_AI_Studio_update.zip --target "$GITHUB_SHA" --title "VisionOps AI Studio $TAG" --notes "VisionOps desktop update. SHA256: $HASH"
+            gh release create "$TAG" VisionOps_AI_Studio_update.zip --target "$GITHUB_SHA" --title "VisionOps AI Studio $TAG" --notes "Desktop update. SHA256: $HASH"
           fi
-          gh release view "$TAG" --json tagName,assets --jq '{tag:.tagName,assets:[.assets[].name]}'
+          gh release view "$TAG" --json assets --jq '.assets[].name'
