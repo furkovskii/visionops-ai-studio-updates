@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'release-input/*.zip'
+      - 'setup-input/*.zip'
       - 'VisionOps_AI_Studio/**'
   workflow_dispatch:
 
@@ -61,6 +62,23 @@ jobs:
           digest=hashlib.sha256(Path('VisionOps_AI_Studio_update.zip').read_bytes()).hexdigest()
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:
               out.write('tag=v'+version+'\nsha256='+digest+'\n')
+          setup=Path('setup-input') / ('v'+version+'.zip')
+          if setup.exists():
+              with zipfile.ZipFile(setup) as z:
+                  names=set(z.namelist())
+                  necessary={'VisionOps_AI_Studio/KURULUM_YAP.bat','VisionOps_AI_Studio/KURULUM.ps1','VisionOps_AI_Studio/app.py','VisionOps_AI_Studio/version.json'}
+                  if not necessary.issubset(names):
+                      raise SystemExit('Installer is missing mandatory files')
+                  installer_version=json.loads(z.read('VisionOps_AI_Studio/version.json'))['version']
+                  if installer_version != version: raise SystemExit('Installer and update versions differ')
+                  for n in names:
+                      if n.endswith('/'): continue
+                      parts=Path(n).parts
+                      if '..' in parts or not n.startswith('VisionOps_AI_Studio/'):
+                          raise SystemExit('Unsafe installer path')
+                      if z.getinfo(n).file_size>20_000_000:
+                          raise SystemExit('Oversized installer entry')
+              shutil.copyfile(setup,'VisionOps_AI_Studio_Setup.zip')
           print('Prepared v'+version,'sha256:',digest)
           PY
       - name: Upload to existing release or publish new one
@@ -75,5 +93,8 @@ jobs:
             gh release upload "$TAG" VisionOps_AI_Studio_update.zip --clobber
           else
             gh release create "$TAG" VisionOps_AI_Studio_update.zip --target "$GITHUB_SHA" --title "VisionOps AI Studio $TAG" --notes "Desktop update. SHA256: $HASH"
+          fi
+          if [[ -f "VisionOps_AI_Studio_Setup.zip" ]]; then
+            gh release upload "$TAG" VisionOps_AI_Studio_Setup.zip --clobber
           fi
           gh release view "$TAG" --json assets --jq '.assets[].name'
