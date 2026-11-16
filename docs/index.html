@@ -50,4 +50,41 @@
   }
  }catch(e){/* keep cached static homepage */}
 })();
+</script><script>
+(()=> {
+ 'use strict';
+ const selectors=[
+ 'nav .brand','nav .navright a','.hero','.hero .eyebrow','.hero h1 span','.hero h1 em',
+ '.hero .lead','.hero .actions a','.hero .footnote','.mock','.screen h3',
+ '.metrics .metric','.metrics .metric strong','.section h2','.section p',
+ '.cards .card','.cards .card h3','.cards .card p','.cards .card .state',
+ '#indir .strip','#indir .strip h2','#indir .strip p','#indir .strip .btn',
+ 'footer span'
+ ];
+ const targets=new Map();
+ for(let k=0;k<selectors.length;k++){
+   document.querySelectorAll(selectors[k]).forEach((el,j)=>{
+     if(el.closest('#visionops-custom-blocks'))return;
+     const key='web_'+k+'_'+j;
+     el.dataset.visionopsTarget=key;targets.set(key,el);
+   });
+ }
+ window.__visionopsTargets=targets;
+ function applyRecord(record){
+  const el=targets.get(record.element_key);if(!el)return;
+  if(typeof record.replacement_text==='string' && el.children.length===0)el.textContent=record.replacement_text;
+  const style=record.style||{};
+  const allow=['color','backgroundColor','fontSize','fontWeight','borderRadius','padding',
+     'marginTop','marginBottom','maxWidth','textAlign'];
+  for(const key of allow)if(typeof style[key]==='string'&&style[key].length<90)el.style[key]=style[key];
+ }
+ window.__visionopsApplyEdit=applyRecord;
+ (async()=>{
+  try {
+   const res=await fetch('https://uozderqllvhuiaquulhg.supabase.co/rest/v1/visionops_site_edits?select=element_key,replacement_text,style',
+    {headers:{apikey:'sb_publishable_UynYBjWSFYyR4Samj6PeXA_gBD8OmCu'}});
+   if(res.ok)for(const item of await res.json())applyRecord(item);
+  }catch(_){}
+ })();
+})();
 </script></body></html>
