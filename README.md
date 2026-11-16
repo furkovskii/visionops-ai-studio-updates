@@ -41,3 +41,13 @@ Website, account creation, app licensing and GitHub release delivery have differ
 - Supabase RLS, yöneticiler dışında marka ayarlarına yazma izni vermez.
 - Ücretlendirme ve canlı Café/Farm analizi etkin değildir.
 - Geliştirme aşamasında yerel yönetici Pet prototipini bulut girişi olmadan açabilir; bu lisans kontrolünün ticari sürüm için uygun olduğu anlamına gelmez.
+
+## v0.9.1 · Açılış, oturum güvenliği ve görsel editör
+- Desktop starts on `/choose` at every launch. Pet / Café / Farm selection appears **before** local login.
+- Local session signing key rotates each desktop process run; previous sessions cannot automatically authenticate. `Beni hatırla` only stores the local username.
+- Cloud refresh tokens are not restored automatically. Remembered cloud email is optional; each new desktop session requires explicit cloud login.
+- Admin desktop studio includes a local Pet panel preview and basic panel title, colors, custom information widgets.
+- Website editor: https://furkovskii.github.io/visionops-ai-studio-updates/editor.html . Full-page preview, pencil edit toggle, text/heading/card/image/button/divider blocks, drag ordering within custom section, admin-only Supabase RLS saves.
+- Account page lets signed-in users rotate a potentially compromised Supabase password. Browser password-manager warnings are not evidence of a VisionOps breach.
+- **Scope limit:** the desktop editor does not yet move every internal dashboard widget, and the website editor reorders only custom blocks, not core layout regions. No production-hardening claims.
+- On Windows, publish v0.9.1 from the provided GitHub publisher; app users then use Check for updates. The working earlier v0.9 remains recoverable.
