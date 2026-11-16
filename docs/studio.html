@@ -48,7 +48,32 @@ function initEditor(){
  };
 }
 async function loadPages(){const pages=await api('visionops_site_pages?select=slug,title&published=eq.true&order=title.asc');const s=el('page');s.replaceChildren();for(const item of pages){const o=document.createElement('option');o.value=item.slug;o.textContent=item.title;s.appendChild(o)}s.value=slug}
-async function loadPage(){if(!editor)return;const rows=await api('visionops_visual_pages?select=project_json,html,css&page_slug=eq.'+encodeURIComponent(slug));if(rows?.length){if(rows[0].project_json&&Object.keys(rows[0].project_json).length)editor.loadProjectData(rows[0].project_json);else{editor.setComponents(rows[0].html||'');editor.setStyle(rows[0].css||'')}}else{editor.setComponents('<section style="padding:80px 30px;background:#f7f4ee;text-align:center"><h1>Yeni sayfa</h1><p>Soldan sürükleyip tasarımını oluştur.</p></section>');editor.setStyle('')}say('Sayfa yüklendi. Öğeyi seç, sağdan yazı ve renkleri düzenle.')}
+async function loadLivePage(){
+ const url=slug==='home'?'./':'page.html?slug='+encodeURIComponent(slug);
+ const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw Error('Mevcut site önizlemesi yüklenemedi (HTTP '+res.status+').');
+ const documentHtml=await res.text(),doc=new DOMParser().parseFromString(documentHtml,'text/html');
+ doc.querySelectorAll('script,iframe,form,dialog,[data-editor-ignore]').forEach(node=>node.remove());
+ const main=doc.querySelector('main')||doc.body;
+ if(!main)throw Error('Mevcut site yapısı bulunamadı');
+ let css=Array.from(doc.querySelectorAll('style')).map(s=>s.textContent).join('\n');
+ css=css.replace(/<\\/style/gi,'');
+ const content=DOMPurify.sanitize(main.outerHTML,{FORBID_TAGS:['script','iframe','object','embed','form','input','textarea','button','video','audio','svg','math'],ALLOW_DATA_ATTR:false});
+ editor.setComponents(content);editor.setStyle(css);
+ say('Mevcut '+(slug==='home'?'ana sayfa':'sayfa')+' tasarımı yüklendi. Metinlere tıklayarak düzenle; soldan bileşen sürükleyebilirsin.');
+}
+async function loadPage(){
+ if(!editor)return;
+ const rows=await api('visionops_visual_pages?select=project_json,html,css&page_slug=eq.'+encodeURIComponent(slug));
+ if(rows?.length){
+   try{
+     const record=rows[0];
+     if(record.project_json&&Object.keys(record.project_json).length)editor.loadProjectData(record.project_json);
+     else{editor.setComponents(record.html||'');editor.setStyle(record.css||'')}
+     say('Son yayımlanmış tasarım yüklendi. Sol taraftan yeni bileşen sürükle.');
+   }catch(err){await loadLivePage()}
+ }else{await loadLivePage()}
+ editor.UndoManager.clear();
+}
 el('page').onchange=async()=>{slug=el('page').value;await loadPage()};
 el('save').onclick=async()=>{if(!jwt||!editor)return;el('save').disabled=true;try{
  const raw=editor.getHtml(), css=editor.getCss();
@@ -59,5 +84,29 @@ el('save').onclick=async()=>{if(!jwt||!editor)return;el('save').disabled=true;tr
  if(JSON.stringify(data.project_json).length>300000)throw Error('Tasarım boyutu sınırı aşıyor.');
  await api('visionops_visual_pages?on_conflict=page_slug','POST',data);
  say('Gelişmiş sayfa tasarımı yayımlandı. Ana siteyi veya ilgili sayfayı yenile.');}catch(err){say('Yayımlanamadı: '+err.message)}finally{el('save').disabled=false}};
-el('loginForm').onsubmit=async ev=>{ev.preventDefault();try{const r=await fetch(ROOT+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({email:el('email').value.trim(),password:el('password').value})});const d=await r.json();if(!r.ok)throw Error(d.msg||d.message||'Giriş reddedildi');jwt=d.access_token;el('password').value='';const roles=await api('visionops_profiles?select=role&limit=1');if(roles?.[0]?.role!=='admin')throw Error('Yönetici yetkin bulunmuyor');el('loginWall').classList.add('hidden');initEditor();await loadPages();el('page').disabled=false;el('template').disabled=false;el('images').disabled=false;el('save').disabled=false;await loadPage()}catch(err){jwt=null;el('loginError').textContent=err.message}};
+async function enterStudio(accessToken){
+ jwt=accessToken;
+ const roles=await api('visionops_profiles?select=role&limit=1');
+ if(roles?.[0]?.role!=='admin')throw Error('Bu hesap yönetici yetkisine sahip değil.');
+ el('loginWall').classList.add('hidden');
+ if(!editor)initEditor();
+ await loadPages();
+ el('page').disabled=false;el('template').disabled=false;el('images').disabled=false;el('save').disabled=false;
+ await loadPage();
+}
+el('loginForm').onsubmit=async ev=>{
+ ev.preventDefault();
+ try{
+  const r=await fetch(ROOT+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({email:el('email').value.trim(),password:el('password').value})});
+  const d=await r.json();if(!r.ok)throw Error(d.msg||d.message||'Giriş reddedildi');
+  el('password').value='';sessionStorage.setItem('visionops_admin_token',d.access_token);
+  await enterStudio(d.access_token);
+ }catch(err){jwt=null;el('loginError').textContent=err.message;say('Giriş hatası: '+err.message)}
+};
+(async()=>{
+ const saved=sessionStorage.getItem('visionops_admin_token');
+ if(!saved)return;
+ try{await enterStudio(saved)}
+ catch(err){sessionStorage.removeItem('visionops_admin_token');jwt=null;el('loginWall').classList.remove('hidden');el('loginError').textContent='Yönetici oturumu sona ermiş. Güvenliğiniz için yeniden giriş yapın.';say('Oturum doğrulanamadı: '+err.message)}
+})();
 </script></body></html>
