@@ -10,6 +10,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 concurrency:
   group: visionops-release
@@ -81,6 +83,17 @@ jobs:
               shutil.copyfile(setup,'VisionOps_AI_Studio_Setup.zip')
           print('Prepared v'+version,'sha256:',digest)
           PY
+      - name: Sign update provenance (free Sigstore, public repository)
+        uses: actions/attest@v4
+        with:
+          subject-path: VisionOps_AI_Studio_update.zip
+          create-storage-record: false
+      - name: Sign installer provenance
+        if: hashFiles('VisionOps_AI_Studio_Setup.zip') != ''
+        uses: actions/attest@v4
+        with:
+          subject-path: VisionOps_AI_Studio_Setup.zip
+          create-storage-record: false
       - name: Upload to existing release or publish new one
         env:
           GH_TOKEN: ${{ github.token }}
