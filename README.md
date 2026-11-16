@@ -51,3 +51,15 @@ Website, account creation, app licensing and GitHub release delivery have differ
 - Account page lets signed-in users rotate a potentially compromised Supabase password. Browser password-manager warnings are not evidence of a VisionOps breach.
 - **Scope limit:** the desktop editor does not yet move every internal dashboard widget, and the website editor reorders only custom blocks, not core layout regions. No production-hardening claims.
 - On Windows, publish v0.9.1 from the provided GitHub publisher; app users then use Check for updates. The working earlier v0.9 remains recoverable.
+
+
+## v0.9.2 — Hesap öz yönetimi ve öğeye tıklayarak düzenleme
+- **Hesabım** (yerel Windows): Yönetici ve görüntüleyici kendi kullanıcı adını ve parolasını mevcut parola doğrulamasıyla güncelleyebilir; değişiklik eski oturumu sonlandırır.
+- **Admin Studio** (masaüstü): Yerel yöneticinin kendi hesap ayarları ve Pet panel önizlemesindeki seçilebilir yazı/kart özellikleri. Tasarım değişiklikleri dosyada yerel olarak kaydedilir. Kamera ve olay hesaplama kodu değişmez.
+- **Bulut & Senkronizasyon**: Bağlı Supabase kullanıcısı görünen adını ve parolasını, eski parolasıyla yeniden doğrulandıktan sonra değiştirebilir.
+- **Hesabım (web)**: Supabase kullanıcısı kendi görünen adını ve parolasını değiştirebilir; işlem sonrası yeniden giriş gerekir.
+- **Web Tasarımcı**: Önceki sürükle/bırak özel bileşenlere ek olarak, ana sayfadaki seçilebilir mevcut yazı ve kutuların görünümünü doğrudan sağ özellik panelinden değiştirebilir. Değişiklikler public-read/admin-write RLS ile korunur.
+- Editörün erişimi admin hesabıyla doğrulanır. Kullanıcılar kendi rolünü admin yapamaz.
+- **Sınır:** Tüm dahili UI öğeleri için tam serbest konumlandırma veya işletim mantığını değiştiren bir no-code sistem değildir.
+- Supabase güvenlik danışmanı sızdırılmış parola kontrolünün kapalı olduğu uyarısını vermektedir; ticari yayından önce ele alınmalıdır.
+- Dağıtım: versioned v0.9.2 update/setup files are published via existing GitHub Actions after a publisher ZIP is uploaded by developer. No payment subscription is activated.
