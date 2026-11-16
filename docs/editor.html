@@ -34,7 +34,7 @@ function siteDoc(){try{return e('preview').contentDocument}catch{return null}}
 function toHex(raw,fallback='#183437'){
  if(!raw)return fallback;
  if(/^#[a-fA-F0-9]{6}$/.test(raw))return raw;
- const m=raw.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
+ const m=raw.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
  if(!m)return fallback;return '#'+m.slice(1,4).map(n=>Number(n).toString(16).padStart(2,'0')).join('');
 }
 function attachEditableTargets(){
