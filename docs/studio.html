@@ -89,7 +89,7 @@ async function enterStudio(accessToken){
  const roles=await api('visionops_profiles?select=role&limit=1');
  if(roles?.[0]?.role!=='admin')throw Error('Bu hesap yönetici yetkisine sahip değil.');
  el('loginWall').classList.add('hidden');
- if(!editor)initEditor();
+ if(!editor){try{initEditor()}catch(err){say('Görsel editör yüklenemedi: '+err.message+' — Sayfayı yenile veya ağ bağlantısını kontrol et. Yönetici oturumun korunuyor.');return}}
  await loadPages();
  el('page').disabled=false;el('template').disabled=false;el('images').disabled=false;el('save').disabled=false;
  await loadPage();
