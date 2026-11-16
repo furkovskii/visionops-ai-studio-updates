@@ -71,3 +71,14 @@ Website, account creation, app licensing and GitHub release delivery have differ
 - Website: signed-in user profile editor and existing live visual editor are available. Published website edits are admin-protected by Supabase RLS.
 - Editing support is **not unrestricted**: only approved visual targets and properties can be edited; all business logic, access controls and interactive behavior remain controlled by developers.
 - Current Windows launch requirement: desktop choose screen precedes local login and new process requires login.
+
+## v0.9.3 · Admin panel, multiple pages and no-cost password screening
+
+- Public homepage no longer has a visual-editor pencil.
+- Website administration: `/admin.html`, authenticated via Supabase Auth and a server-enforced admin RLS role; sections for Panels, Panel Information, Account Settings and a link to Visual Editor.
+- Visual editor: `/editor.html`, includes local undo history for unpublished changes, editable existing elements and custom blocks. New pages may be created with slugs and populated with blocks; public pages render through `/page.html?slug=...`.
+- Desktop Pet workspace: `← Çalışma alanlarına dön` returns to Pet/Café/Farm selection without closing the app. Sign out returns to selection, not app exit. Admin studio now has active/planned panel cards, navigation and local account self-service.
+- Password screening: free HIBP Pwned Passwords k-anonymity (5 SHA-1 hex characters sent only) on local password creation/change and website UI signup/change. It is **not a substitute for server-side Supabase Auth leaked-password protection**; the latter is a paid feature, and the free UI check can be bypassed by direct API use.
+- No new paid services. Supabase existing row-level security remains enabled for page editing, and no payment entitlement is automatically granted.
+- Security limits: local SQLite data is not claimed to be encrypted at rest, unsigned prototype update packages are not suitable for commercial launch, and browser-admin sessions rely on same-origin JavaScript security.
+- Website files are committed to GitHub. Distribution ZIP still needs developer release publishing via GitHub CLI before the installed app's Check for Updates can download v0.9.3.
