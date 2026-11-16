@@ -29,7 +29,7 @@ jobs:
           python3 - <<'PY'
           import os,json,re,hashlib,zipfile
           from pathlib import Path
-          allowed={'app.py','security.py','update_manager.py','studio.py','launcher.pyw','version.json','requirements.txt','VisionOps.ico','templates/index.html','templates/login.html','static/dashboard.css','static/dashboard.js'}
+          allowed={'app.py','security.py','secure_store.py','update_manager.py','studio.py','launcher.pyw','version.json','requirements.txt','VisionOps.ico','templates/index.html','templates/login.html','templates/choose.html','templates/activate.html','static/dashboard.css','static/dashboard.js'}
           required={'app.py','version.json','templates/index.html','security.py','update_manager.py'}
           published=[]
           for package in sorted(Path('release-input').glob('*.zip')) if Path('release-input').exists() else []:
