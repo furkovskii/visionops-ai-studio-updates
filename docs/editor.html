@@ -8,6 +8,11 @@ button{cursor:pointer;border:1px solid #cadbd0;border-radius:10px;padding:10px 1
 label{display:block;font-size:12px;font-weight:700;margin:17px 0 6px}input,textarea,select{width:100%;padding:10px;border:1px solid #ccdbd4;border-radius:8px;font:inherit;color:#23443e;background:#fff}textarea{resize:vertical;min-height:100px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.note{background:#e8f5ee;border:1px solid #c4ddce;padding:13px;border-radius:10px;font-size:12px;color:#386754;line-height:1.55;margin-top:12px}.error{background:#ffebe6;border-color:#efd0c8;color:#8e4131}.hidden{display:none}.selector{font-family:'Space Grotesk';font-size:21px;font-weight:700}.btn-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.btn-row button{flex:1;font-size:12px}.selected{outline:3px solid #0fbeaf!important;outline-offset:-3px}.editing .visionops-block{cursor:pointer}.muted{font-size:12px;color:#647e77;line-height:1.6}.spacer{height:12px}a.back{color:#547a74;text-decoration:none;font-size:12px}
 @media(max-width:1000px){.layout{grid-template-columns:170px minmax(300px,1fr) 235px}.canvas{padding:10px}}@media(max-width:760px){.layout{display:block;height:auto}.left,.right{border:0!important}.canvas{height:570px}.header-middle{display:none}header{flex-wrap:wrap;height:auto;padding:12px}}
 </style></head><body><header><div class="logo"><b>V</b> VisionOps Studio</div><span class="pill">Web Tasarımcısı</span><div class="header-middle" id="status">Düzenleme için giriş gerekiyor</div><a class="back" href="account.html">Hesabım</a><button id="undo" disabled title="Son düzenlemeyi geri al">↶ Geri al</button><button id="publish" class="primary" disabled>Değişiklikleri yayımla</button></header>
+<dialog id="newPageDialog" style="border:0;border-radius:18px;padding:28px;max-width:460px;width:calc(100vw - 36px);box-shadow:0 28px 90px #0004">
+<h2 style="font:700 27px 'Space Grotesk';margin:0 0 7px">Yeni sayfa oluştur</h2><p style="color:#657b73;font-size:13px;line-height:1.55">Sadece sayfanın adını yaz. Bağlantı adresini VisionOps otomatik oluşturacak.</p>
+<form id="newPageForm"><label for="pageTitleInput">Sayfa adı</label><input id="pageTitleInput" placeholder="Örn. Hakkımızda" required maxlength="100" autocomplete="off">
+<div style="display:flex;gap:10px;margin-top:18px"><button type="button" id="cancelPage">Vazgeç</button><button class="primary" type="submit">Sayfa oluştur</button></div></form>
+</dialog>
 <div class="layout"><aside class="left"><div class="title">Bileşen araçları</div><label for="sitePage">Düzenlenen sayfa</label><select id="sitePage" disabled><option value="home">Ana Sayfa</option></select><button id="createPage" disabled style="width:100%;margin:10px 0 18px">+ Yeni sayfa oluştur</button><div id="tools"><div class="tool" draggable="true" data-kind="heading"><span>H</span> Başlık</div><div class="tool" draggable="true" data-kind="paragraph"><span>¶</span> Metin</div><div class="tool" draggable="true" data-kind="card"><span>▤</span> Bilgi kartı</div><div class="tool" draggable="true" data-kind="button"><span>↗</span> Buton</div><div class="tool" draggable="true" data-kind="image"><span>▧</span> Görsel</div><div class="tool" draggable="true" data-kind="divider"><span>—</span> Ayırıcı</div></div><div class="caption">Bir bileşene tıkla veya sayfa önizlemesindeki boşluğa sürükle. Eklenen bileşenleri sürükleyerek sıralayabilirsin.</div><div class="spacer"></div><button id="add" disabled>Seçileni ekle</button><button id="up" disabled>↑ Yukarı</button><button id="down" disabled>↓ Aşağı</button><div id="notice" class="note">Düzenleme yapmadan önce yönetici hesabınla giriş yap.</div></aside>
 <main class="canvas"><div class="frame"><button id="pencil" class="toggle" disabled>✎ Düzenlemeyi aç</button><iframe src="./" title="VisionOps web sitesinin canlı önizlemesi" id="preview"></iframe></div></main>
 <aside class="right"><div class="title">Özellikler</div><section id="signin"><div class="selector">Yönetici girişi</div><p class="muted">VisionOps bulut hesabınla giriş yap. Parolan yerel olarak saklanmaz.</p><form id="login"><label>E-posta</label><input id="email" type="email" autocomplete="email" required><label>Parola</label><input id="password" type="password" autocomplete="current-password" required><button class="primary" style="margin-top:18px;width:100%">Giriş Yap</button></form></section>
@@ -144,17 +149,33 @@ async function changePage(slug){
  say('Sayfa: '+slug+'. Gerekli değişiklikleri yaptıktan sonra yayımla.');
 }
 e('sitePage').onchange=()=>changePage(e('sitePage').value).catch(err=>say(err.message,true));
-e('createPage').onclick=async()=>{
- if(!token)return;
- const title=prompt('Yeni sayfanın başlığı (ör. Hakkımızda):');if(!title)return;
- const slug=prompt('Adres kısa adı (küçük harf, rakam, tire; ör. hakkimizda):');if(!slug)return;
- if(!/^[a-z0-9-]{2,40}$/.test(slug)||title.trim().length>100){say('Geçersiz sayfa adı / adresi.',true);return}
+function slugify(title){
+ return title.toLocaleLowerCase('tr-TR').replace(/ı/g,'i').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s').replace(/ö/g,'o').replace(/ç/g,'c').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40).replace(/-+$/,'');
+}
+e('createPage').onclick=()=>{if(token){e('pageTitleInput').value='';e('newPageDialog').showModal();e('pageTitleInput').focus()}};
+e('cancelPage').onclick=()=>e('newPageDialog').close();
+e('newPageForm').onsubmit=async ev=>{
+ ev.preventDefault();if(!token)return;
+ const title=e('pageTitleInput').value.trim();
+ const base=slugify(title);
+ if(title.length<2||base.length<2){say('Sayfa adını en az iki karakter olarak gir.',true);return}
+ let slug=base;
+ const submit=e('newPageForm').querySelector('button[type=submit]');
+ submit.disabled=true;
  try{
-  await api('/rest/v1/visionops_site_pages','POST',{slug,title:title.trim(),published:true});
+  let attempts=0;
+  while(attempts<10){
+   try{await api('/rest/v1/visionops_site_pages','POST',{slug,title,published:true});break}
+   catch(err){if(!String(err.message).includes('duplicate')&&!String(err.message).includes('23505'))throw err;attempts++;slug=(base.slice(0,35)+'-'+(attempts+1)).slice(0,40)}
+  }
+  if(attempts>=10)throw Error('Benzer isimli çok fazla sayfa var. Başka isim deneyin.');
+  e('newPageDialog').close();
   await refreshPages();await changePage(slug);
-  say('Yeni sayfa oluşturuldu. Sol araçlardan bileşen ekleyip yayımlayabilirsin.');
- }catch(err){say(err.message,true)}
+  say('Yeni sayfa açıldı: '+title+'. Şimdi bir şablon seçebilir veya bileşen ekleyebilirsin.');
+ }catch(err){say('Sayfa oluşturulamadı: '+err.message,true)}
+ finally{submit.disabled=false}
 };
+
 e('login').onsubmit=async ev=>{ev.preventDefault();try{const saved=sessionStorage.getItem('visionops_admin_token');const data=saved?{access_token:saved}:await api('/auth/v1/token?grant_type=password','POST',{email:e('email').value.trim(),password:e('password').value});token=data.access_token;e('password').value='';const p=await api('/rest/v1/visionops_profiles?select=role&limit=1');if(p?.[0]?.role!=='admin')throw Error('Bu hesap için admin yetkisi bulunmuyor.');const [layout,brand,overrides]=await Promise.all([api('/rest/v1/visionops_site_blocks?select=*&order=sort_order.asc&page_slug=eq.'+currentPage),api('/rest/v1/visionops_brand_settings?select=setting_key,setting_value'),api('/rest/v1/visionops_site_edits?select=element_key,replacement_text,style')]);siteEdits=new Map((overrides||[]).map(r=>[r.element_key,r]));blocks=layout||[];original=JSON.parse(JSON.stringify(blocks));const b=Object.fromEntries((brand||[]).map(x=>[x.setting_key,x.setting_value]));for(const k of keys)e(k).value=b[k]||defaults[k];e('signin').classList.add('hidden');e('properties').classList.remove('hidden');e('pencil').disabled=false;e('publish').disabled=false;e('add').disabled=false;e('up').disabled=false;e('down').disabled=false;e('sitePage').disabled=false;e('createPage').disabled=false;await refreshPages();editing=true;e('pencil').textContent='✓ Önizleme moduna geç';draw();syncPreview();attachEditableTargets();say('Düzenleme açık. Sayfayı düzenleyip Yayımla düğmesine basın.')}catch(err){token=null;sessionStorage.removeItem('visionops_admin_token');say(err.message,true)}};
 e('publish').onclick=async()=>{if(!token||busy)return;busy=true;e('publish').disabled=true;try{for(const k of keys){await api('/rest/v1/visionops_brand_settings?setting_key=eq.'+k,'PATCH',{setting_value:e(k).value})}for(const id of deleteIds)await api('/rest/v1/visionops_site_blocks?id=eq.'+id,'DELETE');for(let i=0;i<blocks.length;i++){const b={...blocks[i],sort_order:i*10};if(b.kind==='image'&&b.url&&!b.url.startsWith('https://'))throw Error('Görsellerin adresi https:// ile başlamalı.');if(b.kind==='button'&&b.url&&!(b.url.startsWith('https://')||(b.url.startsWith('/')&&!b.url.startsWith('//'))))throw Error('Geçersiz buton bağlantısı.');if(original.some(x=>x.id===b.id)){await api('/rest/v1/visionops_site_blocks?id=eq.'+b.id,'PATCH',b)}else{await api('/rest/v1/visionops_site_blocks','POST',b)}}for(const edit of siteEdits.values()){
  if(!/^web_\d+_\d+$/.test(edit.element_key))throw Error('Geçersiz öğe kimliği');
