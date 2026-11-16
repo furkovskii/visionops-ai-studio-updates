@@ -1,0 +1,70 @@
+name: Publish VisionOps desktop update
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'VisionOps_AI_Studio/**'
+      - '.github/workflows/publish-visionops.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: visionops-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get project
+        uses: actions/checkout@v4
+      - name: Validate and package
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, re, hashlib, zipfile, os
+          from pathlib import Path
+          root=Path('VisionOps_AI_Studio')
+          required=['app.py','security.py','update_manager.py','studio.py','version.json','templates/index.html']
+          for path in required:
+              if not (root/path).is_file(): raise SystemExit('MISSING '+path)
+          version=json.loads((root/'version.json').read_text(encoding='utf-8'))['version']
+          if not re.fullmatch(r'\d+\.\d+\.\d+',version): raise SystemExit('Invalid version')
+          allow={'.py','.pyw','.json','.txt','.css','.js','.html','.ico'}
+          forbidden={'.env','.sqlite','.db','.pem','.key'}
+          files=[]
+          for path in sorted(root.rglob('*')):
+              if not path.is_file(): continue
+              if path.name in forbidden or any(x in path.parts for x in ['.venv','__pycache__','.git']):
+                  raise SystemExit('Forbidden path: '+str(path))
+              if path.suffix.lower() not in allow: raise SystemExit('Unexpected file: '+str(path))
+              content=path.read_bytes()
+              if any(x in content for x in [b'sb_secret_',b'service_role=',b'-----BEGIN PRIVATE KEY-----']):
+                  raise SystemExit('Potential private credential in '+str(path))
+              files.append(path)
+          with zipfile.ZipFile('VisionOps_AI_Studio_update.zip','w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+              for path in files: z.write(path, path.as_posix())
+          digest=hashlib.sha256(Path('VisionOps_AI_Studio_update.zip').read_bytes()).hexdigest()
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+              out.write('tag=v'+version+'\n')
+              out.write('sha256='+digest+'\n')
+          print('Package',version,'files',len(files),'SHA256',digest)
+          PY
+      - name: Publish or repair release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.package.outputs.tag }}
+          HASH: ${{ steps.package.outputs.sha256 }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" VisionOps_AI_Studio_update.zip --clobber
+          else
+            gh release create "$TAG" VisionOps_AI_Studio_update.zip --target "$GITHUB_SHA" --title "VisionOps AI Studio $TAG" --notes "VisionOps desktop update. SHA256: $HASH"
+          fi
+          gh release view "$TAG" --json tagName,assets --jq '{tag:.tagName,assets:[.assets[].name]}'
