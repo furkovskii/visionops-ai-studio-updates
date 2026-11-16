@@ -31,3 +31,13 @@ The repository and all Release assets are **public**. Python sources inside prot
 - Mobile application: postponed.
 
 Website, account creation, app licensing and GitHub release delivery have different security boundaries. A Supabase entitlement controls access; a UI card alone does not grant a license.
+
+## v0.9.0 · Yönetim Stüdyosu
+- Masaüstü açılış ekranında sağ üstte **Yönetici Girişi** bulunur. Yerel yönetici parolası yalnızca yerel bilgisayar için kullanılır.
+- Yerel yönetici stüdyosunda Pet/Café/Farm görünümleri önizlenir; Café ve Farm gerçek analiz modülü değildir.
+- Başlık ve renklerin yayımlanması için mevcut **Supabase bulut hesabının yönetici rolü** kullanılır.
+- Web sitesinde **Hesabım → Yönetici Girişi** ile aynı Supabase bulut hesabına giriş yaparak başlık, açıklama ve renkler değiştirilebilir.
+- Windows yerel kullanıcı adı/parolası GitHub Pages'e veya Supabase'e aktarılmaz. Bu iki hesap katmanı şu aşamada birleştirilmiş değildir.
+- Supabase RLS, yöneticiler dışında marka ayarlarına yazma izni vermez.
+- Ücretlendirme ve canlı Café/Farm analizi etkin değildir.
+- Geliştirme aşamasında yerel yönetici Pet prototipini bulut girişi olmadan açabilir; bu lisans kontrolünün ticari sürüm için uygun olduğu anlamına gelmez.
