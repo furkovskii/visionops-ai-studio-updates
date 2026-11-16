@@ -38,8 +38,8 @@ function initEditor(){
     const card=document.createElement('button');card.type='button';card.style.cssText='display:flex;flex-direction:column;gap:8px;text-align:left;color:#294e49;background:#edf4ef;border-radius:11px;border:1px solid #d7e5da;padding:8px';
     const img=document.createElement('img');img.src=item.thumbnail||item.url;img.loading='lazy';img.alt=item.title||q;img.style.cssText='width:100%;height:106px;object-fit:cover;border-radius:7px';
     const label=document.createElement('small');label.textContent=(item.creator||'Bilinmeyen sanatçı')+' · '+(item.license||'Lisans belirtilmedi');label.style.cssText='font-size:11px;color:#56776b';card.append(img,label);
-    card.onclick=()=>{const src=item.url.replace(/"/g,'%22'),description=(item.title||q).replace(/[<>&"]/g,'');const creator=(item.creator||'Kaynak: Openverse').replace(/[<>&"]/g,'');const link=(item.foreign_landing_url||'https://openverse.org/').replace(/"/g,'%22');
-      editor.addComponents('<figure style="margin:16px;padding:12px"><img src="'+src+'" alt="'+description+'" style="max-width:100%;height:auto;border-radius:12px"><figcaption style="font-size:12px;color:#52685d">Görsel: '+creator+' · '+(item.license||'Açık lisans')+' · <a href="'+link+'">Kaynak</a></figcaption></figure>');
+    card.onclick=()=>{const safe=x=>String(x||'').replace(/[<>&\"']/g,'');const src=item.url.replace(/"/g,'%22'),description=safe(item.title||q),creator=safe(item.creator||'Kaynak: Openverse'),link=/^https:\/\//.test(item.foreign_landing_url||'')?item.foreign_landing_url.replace(/"/g,'%22'):'https://openverse.org/';
+      editor.addComponents('<figure style="margin:16px;padding:12px"><img src="'+src+'" alt="'+description+'" style="max-width:100%;height:auto;border-radius:12px"><figcaption style="font-size:12px;color:#52685d">Görsel: '+creator+' · '+(safe(item.license)||'Açık lisans')+' · <a href="'+link+'">Kaynak</a></figcaption></figure>');
       el('imageDialog').close();say('Görsel tasarıma eklendi. Lisans ve atıf koşullarını doğrula.');};
     holder.append(card);
    }
