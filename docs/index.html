@@ -31,7 +31,7 @@
  const root='https://uozderqllvhuiaquulhg.supabase.co',key='sb_publishable_UynYBjWSFYyR4Samj6PeXA_gBD8OmCu';
  const holder=document.getElementById('visionops-custom-blocks');if(!holder)return;
  try{
-  let r=await fetch(root+'/rest/v1/visionops_site_blocks?select=id,kind,content,url,background,foreground,sort_order&order=sort_order.asc',{headers:{apikey:key}});
+  let r=await fetch(root+'/rest/v1/visionops_site_blocks?select=id,kind,content,url,background,foreground,sort_order&order=sort_order.asc&page_slug=eq.home',{headers:{apikey:key}});
   if(!r.ok)return;const items=await r.json();
   for(const item of items){
    const node=document.createElement('article');node.className='visionops-block';node.dataset.id=item.id;node.dataset.kind=item.kind;
@@ -87,4 +87,6 @@
   }catch(_){}
  })();
 })();
+</script><script>
+(async()=>{try{const r=await fetch('https://uozderqllvhuiaquulhg.supabase.co/rest/v1/visionops_site_pages?select=slug,title&published=eq.true&slug=neq.home&order=title.asc',{headers:{apikey:'sb_publishable_UynYBjWSFYyR4Samj6PeXA_gBD8OmCu'}});if(!r.ok)return;const pages=await r.json();const nav=document.querySelector('.navright');if(nav)for(const p of pages){const a=document.createElement('a');a.href='page.html?slug='+encodeURIComponent(p.slug);a.textContent=p.title;nav.insertBefore(a,nav.lastElementChild)}}catch(err){}})();
 </script></body></html>
