@@ -11,14 +11,82 @@ label{display:block;font-size:12px;font-weight:700;margin:17px 0 6px}input,texta
 <div class="layout"><aside class="left"><div class="title">Bileşen araçları</div><div id="tools"><div class="tool" draggable="true" data-kind="heading"><span>H</span> Başlık</div><div class="tool" draggable="true" data-kind="paragraph"><span>¶</span> Metin</div><div class="tool" draggable="true" data-kind="card"><span>▤</span> Bilgi kartı</div><div class="tool" draggable="true" data-kind="button"><span>↗</span> Buton</div><div class="tool" draggable="true" data-kind="image"><span>▧</span> Görsel</div><div class="tool" draggable="true" data-kind="divider"><span>—</span> Ayırıcı</div></div><div class="caption">Bir bileşene tıkla veya sayfa önizlemesindeki boşluğa sürükle. Eklenen bileşenleri sürükleyerek sıralayabilirsin.</div><div class="spacer"></div><button id="add" disabled>Seçileni ekle</button><button id="up" disabled>↑ Yukarı</button><button id="down" disabled>↓ Aşağı</button><div id="notice" class="note">Düzenleme yapmadan önce yönetici hesabınla giriş yap.</div></aside>
 <main class="canvas"><div class="frame"><button id="pencil" class="toggle" disabled>✎ Düzenlemeyi aç</button><iframe src="./" title="VisionOps web sitesinin canlı önizlemesi" id="preview"></iframe></div></main>
 <aside class="right"><div class="title">Özellikler</div><section id="signin"><div class="selector">Yönetici girişi</div><p class="muted">VisionOps bulut hesabınla giriş yap. Parolan yerel olarak saklanmaz.</p><form id="login"><label>E-posta</label><input id="email" type="email" autocomplete="email" required><label>Parola</label><input id="password" type="password" autocomplete="current-password" required><button class="primary" style="margin-top:18px;width:100%">Giriş Yap</button></form></section>
-<section id="properties" class="hidden"><div class="selector" id="selected-title">Öğe seçin</div><div id="fields" class="hidden"><label>İçerik</label><textarea id="itemText" maxlength="800"></textarea><label>Bağlantı / Görsel adresi (https)</label><input id="itemUrl" placeholder="https://..." maxlength="1200"><div class="two"><div><label>Arka plan</label><input id="itemBg" type="color" value="#ffffff"></div><div><label>Yazı rengi</label><input id="itemFg" type="color" value="#183437"></div></div><button id="remove" style="margin-top:18px;width:100%">Öğeyi sil</button></div><div class="spacer"></div><div class="title">Ana sayfa metinleri</div><label>Başlık</label><input id="site_hero_title" maxlength="280"><label>Vurgu</label><input id="site_hero_accent" maxlength="280"><label>Açıklama</label><textarea id="site_hero_subtitle" maxlength="280"></textarea><div class="two"><div><label>Site rengi</label><input type="color" id="site_bg"></div><div><label>Vurgu rengi</label><input type="color" id="site_accent"></div></div><button id="logout">Oturumu kapat</button></section></aside></div>
+<section id="properties" class="hidden"><div class="selector" id="selected-title">Öğe seçin</div><div id="fields" class="hidden"><label>İçerik</label><textarea id="itemText" maxlength="800"></textarea><label>Bağlantı / Görsel adresi (https)</label><input id="itemUrl" placeholder="https://..." maxlength="1200"><div class="two"><div><label>Arka plan</label><input id="itemBg" type="color" value="#ffffff"></div><div><label>Yazı rengi</label><input id="itemFg" type="color" value="#183437"></div></div><button id="remove" style="margin-top:18px;width:100%">Öğeyi sil</button></div><div class="spacer"></div><section id="siteElementProperties" class="hidden" style="margin-top:20px;border-top:1px solid #d9e4dc;padding-top:20px">
+  <div class="title">Seçilen sayfa öğesi</div><div id="siteElementLabel" class="muted"></div>
+  <label for="siteElementText">Metni değiştir</label><textarea id="siteElementText" maxlength="800"></textarea>
+  <div class="two"><div><label for="siteElementColor">Yazı rengi</label><input type="color" id="siteElementColor" value="#183437"></div>
+  <div><label for="siteElementBg">Arka plan</label><input type="color" id="siteElementBg" value="#ffffff"></div>
+  <div><label for="siteElementSize">Yazı boyutu (px)</label><input type="number" min="10" max="72" id="siteElementSize" value="16"></div>
+  <div><label for="siteElementRadius">Köşe yuvarlaklığı (px)</label><input type="number" min="0" max="56" id="siteElementRadius" value="0"></div>
+  <div><label for="siteElementPadding">İç boşluk (px)</label><input type="number" min="0" max="72" id="siteElementPadding" value="0"></div></div>
+  <button id="siteElementReset" type="button" style="width:100%">Öğe düzenini sıfırla</button>
+  <p class="muted">Site önizlemesindeki bir yazıya veya kutuya tıklayarak seç. Bu düzen sadece seçilen öğeye uygulanır.</p>
+</section><div class="title">Ana sayfa metinleri</div><label>Başlık</label><input id="site_hero_title" maxlength="280"><label>Vurgu</label><input id="site_hero_accent" maxlength="280"><label>Açıklama</label><textarea id="site_hero_subtitle" maxlength="280"></textarea><div class="two"><div><label>Site rengi</label><input type="color" id="site_bg"></div><div><label>Vurgu rengi</label><input type="color" id="site_accent"></div></div><button id="logout">Oturumu kapat</button></section></aside></div>
 <script>
 'use strict';
 const BASE='https://uozderqllvhuiaquulhg.supabase.co',PUB='sb_publishable_UynYBjWSFYyR4Samj6PeXA_gBD8OmCu',keys=['site_hero_title','site_hero_accent','site_hero_subtitle','site_bg','site_accent'],e=id=>document.getElementById(id);
 let token=null,editing=false,selected=null,kind='heading',blocks=[],original=[],deleteIds=[],busy=false;
+let siteEdits=new Map(),selectedSiteKey=null;
 function say(s,bad=false){e('notice').textContent=s;e('notice').className='note'+(bad?' error':'');e('status').textContent=s}
 async function api(path,method='GET',data=null){let r=await fetch(BASE+path,{method,headers:{apikey:PUB,...(token?{Authorization:'Bearer '+token}:{}),...(data?{'Content-Type':'application/json'}:{})},body:data?JSON.stringify(data):undefined});const d=await r.json().catch(()=>null);if(!r.ok)throw Error(d?.message||d?.msg||'İstek reddedildi.');return d}
 function siteDoc(){try{return e('preview').contentDocument}catch{return null}}
+
+function toHex(raw,fallback='#183437'){
+ if(!raw)return fallback;
+ if(/^#[a-fA-F0-9]{6}$/.test(raw))return raw;
+ const m=raw.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
+ if(!m)return fallback;return '#'+m.slice(1,4).map(n=>Number(n).toString(16).padStart(2,'0')).join('');
+}
+function attachEditableTargets(){
+ const doc=siteDoc();if(!doc||!editing)return;
+ let css=doc.getElementById('visionops-editor-mark');if(!css){
+  css=doc.createElement('style');css.id='visionops-editor-mark';css.textContent='[data-visionops-target]{cursor:crosshair!important}[data-visionops-target]:hover{outline:2px dotted #0c9f92!important;outline-offset:2px!important}.visionops-selected{outline:3px solid #0a9f94!important;outline-offset:2px!important}';doc.head.append(css);
+ }
+ for(const node of doc.querySelectorAll('[data-visionops-target]')){
+  if(node.dataset.visionopsBound)return;node.dataset.visionopsBound='1';
+  node.addEventListener('click',event=>{if(!editing)return;event.preventDefault();event.stopPropagation();
+   selectedSiteKey=node.dataset.visionopsTarget;
+   renderSelectedSiteElement();
+  });
+ }
+}
+function renderSelectedSiteElement(){
+ const doc=siteDoc(),node=doc?.querySelector('[data-visionops-target="'+selectedSiteKey+'"]');
+ doc?.querySelectorAll('.visionops-selected').forEach(x=>x.classList.remove('visionops-selected'));
+ if(!node){e('siteElementProperties').classList.add('hidden');return}
+ node.classList.add('visionops-selected');
+ e('siteElementProperties').classList.remove('hidden');
+ e('siteElementLabel').textContent=node.tagName.toLowerCase()+' • '+selectedSiteKey;
+ const rec=siteEdits.get(selectedSiteKey);
+ const cs=doc.defaultView.getComputedStyle(node);
+ e('siteElementText').disabled=node.children.length>0;
+ e('siteElementText').value=rec?.replacement_text??(node.children.length? '':node.textContent.trim());
+ e('siteElementColor').value=toHex(rec?.style?.color||cs.color);
+ e('siteElementBg').value=toHex(rec?.style?.backgroundColor||cs.backgroundColor,'#ffffff');
+ e('siteElementSize').value=parseInt(rec?.style?.fontSize||cs.fontSize,10)||16;
+ e('siteElementPadding').value=parseInt(rec?.style?.padding||cs.paddingTop,10)||0;
+ e('siteElementRadius').value=parseInt(rec?.style?.borderRadius||cs.borderTopLeftRadius,10)||0;
+}
+function updateSiteProperty(field,key,unit=''){
+ if(!selectedSiteKey)return;const value=e(field).value;
+ const current=siteEdits.get(selectedSiteKey)||{element_key:selectedSiteKey,replacement_text:null,style:{}};
+ if(key==='replacement_text'){current.replacement_text=e(field).disabled?null:value;}
+ else{current.style[key]=unit?Number(value)+unit:value;}
+ siteEdits.set(selectedSiteKey,current);
+ const node=siteDoc()?.querySelector('[data-visionops-target="'+selectedSiteKey+'"]');
+ if(!node)return;
+ if(key==='replacement_text' && node.children.length===0)node.textContent=value;
+ else if(key!=='replacement_text')node.style[key]=current.style[key];
+}
+for(const [id,key,unit] of [['siteElementText','replacement_text',''],['siteElementColor','color',''],
+ ['siteElementBg','backgroundColor',''],['siteElementSize','fontSize','px'],
+ ['siteElementPadding','padding','px'],['siteElementRadius','borderRadius','px']])
+ e(id).addEventListener('input',()=>updateSiteProperty(id,key,unit));
+e('siteElementReset').onclick=()=>{
+ if(!selectedSiteKey)return;siteEdits.set(selectedSiteKey,{element_key:selectedSiteKey,replacement_text:null,style:{}});
+ e('preview').src='./?editor_reload='+Date.now();
+};
+
 function draw(){const d=siteDoc(),host=d?.getElementById('visionops-custom-blocks');if(!host)return;host.replaceChildren();if(editing){host.style.minHeight='100px';host.style.border='2px dashed #16a596'}else{host.style.minHeight='';host.style.border=''}for(const b of blocks){let n=d.createElement('article');n.className='visionops-block';n.dataset.kind=b.kind;n.dataset.id=b.id;n.style.background=b.background;n.style.color=b.foreground;n.draggable=editing;n.style.cursor=editing?'grab':'';if(selected===b.id)n.style.outline='3px solid #19c6b6';if(['heading','paragraph','card'].includes(b.kind))n.textContent=b.content||'';if(b.kind==='button'){let a=d.createElement('span');a.className='custom-button';a.textContent=b.content||'Buton';n.append(a)}if(b.kind==='divider')n.textContent='';if(b.kind==='image'&&b.url?.startsWith('https://')){let img=d.createElement('img');img.src=b.url;img.alt=b.content||'Görsel';n.append(img)}if(editing){n.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();select(b.id)});n.addEventListener('dragstart',event=>{event.dataTransfer.setData('text/visionops-id',b.id)});n.addEventListener('dragover',event=>event.preventDefault());n.addEventListener('drop',event=>{event.preventDefault();let id=event.dataTransfer.getData('text/visionops-id');if(id&&id!==b.id){let a=blocks.findIndex(x=>x.id===id),c=blocks.findIndex(x=>x.id===b.id);if(a<0)return;let t=blocks.splice(a,1)[0];blocks.splice(c,0,t);draw()}})}host.append(n)}}
 function showProps(){const b=blocks.find(x=>x.id===selected);e('fields').classList.toggle('hidden',!b);e('selected-title').textContent=b?'Seçili: '+b.kind:'Bileşen seçin';if(b){e('itemText').value=b.content;e('itemUrl').value=b.url;e('itemBg').value=b.background;e('itemFg').value=b.foreground}draw()}
 function select(id){selected=id;showProps()}
@@ -32,10 +100,23 @@ e('remove').onclick=()=>{let i=blocks.findIndex(x=>x.id===selected);if(i<0)retur
 const defaults={site_hero_title:'Görünmeyeni',site_hero_accent:'görünür kılın.',site_hero_subtitle:'Görüntüleri akıllı analizlere dönüştürün.',site_bg:'#f8f5ef',site_accent:'#0f726e'};
 function syncPreview(){const d=siteDoc();if(!d)return;for(const [k,id] of [['site_hero_title','site-title'],['site_hero_accent','site-emphasis'],['site_hero_subtitle','site-description']]){let node=d.getElementById(id);if(node)node.textContent=e(k).value}d.body.style.background=e('site_bg').value;d.documentElement.style.setProperty('--preview-accent',e('site_accent').value);let em=d.getElementById('site-emphasis');if(em)em.style.color=e('site_accent').value}
 keys.forEach(k=>e(k).addEventListener('input',syncPreview));
-e('preview').addEventListener('load',()=>{let d=siteDoc();if(!d)return;const host=d.getElementById('visionops-custom-blocks');if(host){host.addEventListener('dragover',ev=>ev.preventDefault());host.addEventListener('drop',ev=>{ev.preventDefault();const k=ev.dataTransfer.getData('text/visionops-new-kind');if(k)add(k)})}for(const [id,input] of [['site-title','site_hero_title'],['site-emphasis','site_hero_accent'],['site-description','site_hero_subtitle']]){const target=d.getElementById(id);if(target)target.addEventListener('click',evt=>{if(!editing)return;evt.preventDefault();evt.stopPropagation();e(input).focus();say('Seçili alan: '+input+'; sağdaki özelliklerden düzenle.')})}if(editing)d.addEventListener('click',stopLink,true);draw();syncPreview()});
+e('preview').addEventListener('load',()=>{let d=siteDoc();if(!d)return;const host=d.getElementById('visionops-custom-blocks');if(host){host.addEventListener('dragover',ev=>ev.preventDefault());host.addEventListener('drop',ev=>{ev.preventDefault();const k=ev.dataTransfer.getData('text/visionops-new-kind');if(k)add(k)})}for(const [id,input] of [['site-title','site_hero_title'],['site-emphasis','site_hero_accent'],['site-description','site_hero_subtitle']]){const target=d.getElementById(id);if(target)target.addEventListener('click',evt=>{if(!editing)return;evt.preventDefault();evt.stopPropagation();e(input).focus();say('Seçili alan: '+input+'; sağdaki özelliklerden düzenle.')})}if(editing)d.addEventListener('click',stopLink,true);draw();syncPreview();attachEditableTargets();if(selectedSiteKey)renderSelectedSiteElement()});
 function stopLink(ev){if(ev.target.closest('a')){ev.preventDefault();ev.stopPropagation()}}
-e('pencil').onclick=()=>{editing=!editing;e('pencil').textContent=editing?'✓ Önizleme moduna geç':'✎ Düzenlemeyi aç';e('pencil').classList.toggle('active',editing);const d=siteDoc();if(d){if(editing)d.addEventListener('click',stopLink,true);else d.removeEventListener('click',stopLink,true)}draw()};
-e('login').onsubmit=async ev=>{ev.preventDefault();try{const data=await api('/auth/v1/token?grant_type=password','POST',{email:e('email').value.trim(),password:e('password').value});token=data.access_token;e('password').value='';const p=await api('/rest/v1/visionops_profiles?select=role&limit=1');if(p?.[0]?.role!=='admin')throw Error('Bu hesap için admin yetkisi bulunmuyor.');const [layout,brand]=await Promise.all([api('/rest/v1/visionops_site_blocks?select=*&order=sort_order.asc'),api('/rest/v1/visionops_brand_settings?select=setting_key,setting_value')]);blocks=layout||[];original=JSON.parse(JSON.stringify(blocks));const b=Object.fromEntries((brand||[]).map(x=>[x.setting_key,x.setting_value]));for(const k of keys)e(k).value=b[k]||defaults[k];e('signin').classList.add('hidden');e('properties').classList.remove('hidden');e('pencil').disabled=false;e('publish').disabled=false;e('add').disabled=false;e('up').disabled=false;e('down').disabled=false;editing=true;e('pencil').textContent='✓ Önizleme moduna geç';draw();syncPreview();say('Düzenleme açık. Sayfayı düzenleyip Yayımla düğmesine basın.')}catch(err){token=null;say(err.message,true)}};
-e('publish').onclick=async()=>{if(!token||busy)return;busy=true;e('publish').disabled=true;try{for(const k of keys){await api('/rest/v1/visionops_brand_settings?setting_key=eq.'+k,'PATCH',{setting_value:e(k).value})}for(const id of deleteIds)await api('/rest/v1/visionops_site_blocks?id=eq.'+id,'DELETE');for(let i=0;i<blocks.length;i++){const b={...blocks[i],sort_order:i*10};if(b.kind==='image'&&b.url&&!b.url.startsWith('https://'))throw Error('Görsellerin adresi https:// ile başlamalı.');if(b.kind==='button'&&b.url&&!(b.url.startsWith('https://')||(b.url.startsWith('/')&&!b.url.startsWith('//'))))throw Error('Geçersiz buton bağlantısı.');if(original.some(x=>x.id===b.id)){await api('/rest/v1/visionops_site_blocks?id=eq.'+b.id,'PATCH',b)}else{await api('/rest/v1/visionops_site_blocks','POST',b)}}original=JSON.parse(JSON.stringify(blocks));deleteIds=[];say('Değişiklikler yayımlandı. Ana sayfayı yenilediğinde görünür.')}catch(err){say('Yayınlama başarısız: '+err.message,true)}finally{busy=false;e('publish').disabled=false}};
+e('pencil').onclick=()=>{editing=!editing;e('pencil').textContent=editing?'✓ Önizleme moduna geç':'✎ Düzenlemeyi aç';e('pencil').classList.toggle('active',editing);const d=siteDoc();if(d){if(editing)d.addEventListener('click',stopLink,true);else d.removeEventListener('click',stopLink,true)}draw();attachEditableTargets()};
+e('login').onsubmit=async ev=>{ev.preventDefault();try{const data=await api('/auth/v1/token?grant_type=password','POST',{email:e('email').value.trim(),password:e('password').value});token=data.access_token;e('password').value='';const p=await api('/rest/v1/visionops_profiles?select=role&limit=1');if(p?.[0]?.role!=='admin')throw Error('Bu hesap için admin yetkisi bulunmuyor.');const [layout,brand,overrides]=await Promise.all([api('/rest/v1/visionops_site_blocks?select=*&order=sort_order.asc'),api('/rest/v1/visionops_brand_settings?select=setting_key,setting_value'),api('/rest/v1/visionops_site_edits?select=element_key,replacement_text,style')]);siteEdits=new Map((overrides||[]).map(r=>[r.element_key,r]));blocks=layout||[];original=JSON.parse(JSON.stringify(blocks));const b=Object.fromEntries((brand||[]).map(x=>[x.setting_key,x.setting_value]));for(const k of keys)e(k).value=b[k]||defaults[k];e('signin').classList.add('hidden');e('properties').classList.remove('hidden');e('pencil').disabled=false;e('publish').disabled=false;e('add').disabled=false;e('up').disabled=false;e('down').disabled=false;editing=true;e('pencil').textContent='✓ Önizleme moduna geç';draw();syncPreview();attachEditableTargets();say('Düzenleme açık. Sayfayı düzenleyip Yayımla düğmesine basın.')}catch(err){token=null;say(err.message,true)}};
+e('publish').onclick=async()=>{if(!token||busy)return;busy=true;e('publish').disabled=true;try{for(const k of keys){await api('/rest/v1/visionops_brand_settings?setting_key=eq.'+k,'PATCH',{setting_value:e(k).value})}for(const id of deleteIds)await api('/rest/v1/visionops_site_blocks?id=eq.'+id,'DELETE');for(let i=0;i<blocks.length;i++){const b={...blocks[i],sort_order:i*10};if(b.kind==='image'&&b.url&&!b.url.startsWith('https://'))throw Error('Görsellerin adresi https:// ile başlamalı.');if(b.kind==='button'&&b.url&&!(b.url.startsWith('https://')||(b.url.startsWith('/')&&!b.url.startsWith('//'))))throw Error('Geçersiz buton bağlantısı.');if(original.some(x=>x.id===b.id)){await api('/rest/v1/visionops_site_blocks?id=eq.'+b.id,'PATCH',b)}else{await api('/rest/v1/visionops_site_blocks','POST',b)}}for(const edit of siteEdits.values()){
+ if(!/^web_\\d+_\\d+$/.test(edit.element_key))throw Error('Geçersiz öğe kimliği');
+ const styles=edit.style||{};
+ for(const [k,v] of Object.entries(styles)){
+  if(!['color','backgroundColor','fontSize','padding','borderRadius'].includes(k) ||
+   typeof v!=='string'||v.length>40)throw Error('Geçersiz biçimlendirme');
+ }
+ await fetch(BASE+'/rest/v1/visionops_site_edits?on_conflict=element_key',{
+   method:'POST',headers:{apikey:PUB,Authorization:'Bearer '+token,
+   'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},
+   body:JSON.stringify(edit)
+ }).then(async r=>{if(!r.ok)throw Error('Sayfa öğesi yayımlanamadı: '+r.status)});
+}
+original=JSON.parse(JSON.stringify(blocks));deleteIds=[];say('Değişiklikler yayımlandı. Ana sayfayı yenilediğinde görünür.')}catch(err){say('Yayınlama başarısız: '+err.message,true)}finally{busy=false;e('publish').disabled=false}};
 e('logout').onclick=()=>{token=null;location.reload()};
 </script></body></html>
