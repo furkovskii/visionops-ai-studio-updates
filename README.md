@@ -63,3 +63,11 @@ Website, account creation, app licensing and GitHub release delivery have differ
 - **Sınır:** Tüm dahili UI öğeleri için tam serbest konumlandırma veya işletim mantığını değiştiren bir no-code sistem değildir.
 - Supabase güvenlik danışmanı sızdırılmış parola kontrolünün kapalı olduğu uyarısını vermektedir; ticari yayından önce ele alınmalıdır.
 - Dağıtım: versioned v0.9.2 update/setup files are published via existing GitHub Actions after a publisher ZIP is uploaded by developer. No payment subscription is activated.
+
+## v0.9.2 · Self-service account settings + desktop visual edits
+- Both local admin and viewer accounts can change only their own username/password after presenting their current password. Existing login sessions are invalidated on change; roles never change through self-service.
+- Windows Pet dashboard: admin-only preview-based property inspector for selected text/cards (appearance changes only), with strict allowlisting and no change to camera/analytics logic.
+- Cloud: signed-in users can change their own `display_name` and password with current-password reauthentication. Only the `display_name` column is writable to non-admin users; authorization `role` cannot be edited.
+- Website: signed-in user profile editor and existing live visual editor are available. Published website edits are admin-protected by Supabase RLS.
+- Editing support is **not unrestricted**: only approved visual targets and properties can be edited; all business logic, access controls and interactive behavior remain controlled by developers.
+- Current Windows launch requirement: desktop choose screen precedes local login and new process requires login.
