@@ -82,3 +82,18 @@ Website, account creation, app licensing and GitHub release delivery have differ
 - No new paid services. Supabase existing row-level security remains enabled for page editing, and no payment entitlement is automatically granted.
 - Security limits: local SQLite data is not claimed to be encrypted at rest, unsigned prototype update packages are not suitable for commercial launch, and browser-admin sessions rely on same-origin JavaScript security.
 - Website files are committed to GitHub. Distribution ZIP still needs developer release publishing via GitHub CLI before the installed app's Check for Updates can download v0.9.3.
+
+## v0.9.4 — Ücretsiz güvenlik ve görsel site tasarımı
+- Web editöründeki `Geçersiz öğe kimliği` hatası: hatalı kaçırılmış regex düzeltildi.
+- Yeni sayfa oluşturma: tek isim alanı, otomatik Türkçe uyumlu URL kısa adı.
+- İki editör: mevcut görsel düzenleyici (`/editor.html`) ve ücretsiz açık kaynak GrapesJS stüdyosu (`/studio.html`), yalnızca Supabase admin hesabıyla erişilebilir.
+- GrapesJS: sürükle-bırak bloklar, font/stil denetimi, şablonlar, mobil/tablet önizleme, Openverse anahtarsız açık lisanslı görsel araması; lisans ve atıf koşulları kullanıcı tarafından kontrol edilmeli.
+- GrapesJS sayfaları Supabase RLS ile korunur; yayınlanmış içerikler `/page.html?slug=...` üzerinden script çalıştırmayan sandbox iframe ile görüntülenir.
+- GitHub Actions `actions/attest@v4` ile ücretsiz Sigstore/SLSA kaynak doğrulama kaydı üretir.
+- v0.9.4 istemcisi yeni güncellemeleri doğrulanmış yayın imzası olmadan yüklemez; *ücretsiz GitHub CLI* gerektirir. Kötü amaçlı yazılım barındırabilecek manuel ZIP yüklemeleri de aynı şekilde doğrulanır.
+- Masaüstü: isteğe bağlı parola korumalı taşınabilir AES-256-GCM yedek. Yedekler yerel oluşturulur, buluta gönderilmez; 12+ karakterlik yedek parolası unutulursa geri yüklenemez.
+- Yeni kurulum, `YEDEK_GERI_YUKLE.bat` kurtarma yardımcısını içerir. Mevcut kurulumda aynı kurtarma işlemi, uygulama kapalıyken `secure_backup.py --restore <file>` üzerinden çalıştırılabilir.
+- **Sınır:** canlı SQLite veritabanı tamamen şifrelenmiş değildir. Windows Device Encryption/BitLocker gibi cihaz-disk şifrelemesini destekleyen bilgisayarda etkinleştirmek gerekir. Bu özellik bazı Windows sürümlerinde bulunmayabilir.
+- Supabase'in server-side leaked password protection özelliği **Pro planında** bulunduğu için etkinleştirilmedi. Ücretsiz istemci tarafı parola kontrolü tek başına zorunlu sunucu koruması sağlamaz.
+- Güvenlik özellikleri Windows, internete bağlı GitHub ve gerçek kamera üzerinde uçtan uca henüz doğrulanmadı; prototip üzerinde çalışıyoruz.
+- Ücretli ürün, yükseltme veya abonelik açılmadı. GitHub Pages ve herkese açık Actions attestations ücretsiz kullanım kotası ve politikalarına tabidir.
