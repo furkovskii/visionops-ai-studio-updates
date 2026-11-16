@@ -97,3 +97,16 @@ Website, account creation, app licensing and GitHub release delivery have differ
 - Supabase'in server-side leaked password protection özelliği **Pro planında** bulunduğu için etkinleştirilmedi. Ücretsiz istemci tarafı parola kontrolü tek başına zorunlu sunucu koruması sağlamaz.
 - Güvenlik özellikleri Windows, internete bağlı GitHub ve gerçek kamera üzerinde uçtan uca henüz doğrulanmadı; prototip üzerinde çalışıyoruz.
 - Ücretli ürün, yükseltme veya abonelik açılmadı. GitHub Pages ve herkese açık Actions attestations ücretsiz kullanım kotası ve politikalarına tabidir.
+
+## v0.9.5 · Consolidated editor, desktop usability, accounts
+- One web editor: `/studio.html` (old `/editor.html` now redirects). Only available from the admin dashboard; user navigation no longer has two editors.
+- Admin session is reused through same-tab `sessionStorage` only after server-side Supabase admin role re-verification. Expired sessions require login again.
+- Editor loads current website HTML/CSS on first use; no empty initial canvas. GrapesJS stylesheet path corrected to `dist/css/grapes.min.css`. Published page data is preserved as GrapesJS project JSON.
+- Web main page renders published advanced design instead of duplicating the original homepage below it.
+- GitHub Actions gained `artifact-metadata: write` permission needed for artifact attestations v4. Historical failing jobs must still be inspected from actual GitHub Actions logs.
+- Windows startup shows CSS logo animation (reduced-motion respected), then the Pet/Café/Farm chooser with welcome copy.
+- Pet sidebar scrolls and ends in a single **Çıkış yap** button. Touchpad horizontal swipe (when Windows WebView exposes it) and Alt+Left attempt to return to prior panel view; behavior is hardware-dependent.
+- Desktop admin visual designer removed; replaced with product cards and account list, including creation and last sign-in timestamp (recorded from v0.9.5 onward).
+- Supabase admin role-checked RPC `visionops_admin_account_overview` shows account package/status/grant date/last signed-in, but only if the local desktop admin has also connected a Supabase admin cloud session. Never return password hashes.
+- Packages remain free prototype; no payment, billing, or new paid service.
+- Limitations: no end-to-end Windows/WebView test, no verified successful GitHub Action run, and current account duration only means enrollment/since granted, not total time used.
