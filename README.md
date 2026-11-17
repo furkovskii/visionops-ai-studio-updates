@@ -118,3 +118,14 @@ Website, account creation, app licensing and GitHub release delivery have differ
 - GitHub Actions `repair-v096.yml` prepares compatibility packages from prior Release; trusted signer `publish-visionops.yml` consumes them after repair workflow success and emits persistently stored free provenance attestations.
 - The legacy installed app requires the trusted signer workflow, so a ZIP created directly without that attestation cannot be installed through the strict local updater. Use the app's Check for Updates after both workflows succeed.
 - Neither workflow success nor Windows and browser end-to-end functionality can be guaranteed from static source tests. Do not expose local admin/data services to the Internet.
+
+## Lovable website integration — 17 November 2026
+
+- New public website: **https://visionops-ai-studio.lovable.app/** (Lovable free-plan hosting).
+- The previous GitHub Pages website at https://furkovskii.github.io/visionops-ai-studio-updates/ now redirects visitors to the Lovable website. Old /admin.html, /account.html, and /studio.html URLs redirect to the relevant Lovable routes.
+- Previous web pages are backed up under `docs/legacy-2026-11/`. To roll back, restore these into `docs/`.
+- Lovable project: https://lovable.dev/projects/90ddaf44-3d8e-41b4-bd50-b809a9324b0e
+- Lovable frontend uses the **existing** Supabase Auth and RLS project; no new database was provisioned.
+- Current Lovable code has **not** been synchronized back into this repository. GitHub remains the Windows release and update distribution repo; Lovable hosts the web frontend independently.
+- The site's free-domain URL changes from GitHub Pages to lovable.app on redirect. This is a redirect-based integration, not a static code deployment into GitHub Pages.
+- Before a commercial launch, perform browser QA, Supabase permissions tests and confirm download links; do not publish paid plans or expose customer data.
