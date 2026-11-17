@@ -7,6 +7,9 @@ on:
       - 'setup-input/*.zip'
       - 'VisionOps_AI_Studio/**'
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Build compatibility update v0.9.6"]
+    types: [completed]
 
 permissions:
   contents: write
@@ -20,10 +23,22 @@ concurrency:
 
 jobs:
   publish:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout update source
         uses: actions/checkout@v4
+      - name: Bring v0.9.6 into the trusted publishing workflow
+        if: github.event_name == 'workflow_run'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p old release-input setup-input
+          gh release download v0.9.6 --repo "${{ github.repository }}" --pattern VisionOps_AI_Studio_update.zip --dir old
+          cp old/VisionOps_AI_Studio_update.zip release-input/v0.9.6.zip
+          gh release download v0.9.6 --repo "${{ github.repository }}" --pattern VisionOps_AI_Studio_Setup.zip --dir old || true
+          if [ -f old/VisionOps_AI_Studio_Setup.zip ]; then cp old/VisionOps_AI_Studio_Setup.zip setup-input/v0.9.6.zip; fi
       - name: Validate package and determine version
         id: build
         shell: bash
@@ -88,13 +103,11 @@ jobs:
         uses: actions/attest@v4
         with:
           subject-path: VisionOps_AI_Studio_update.zip
-          create-storage-record: false
       - name: Sign installer provenance
         if: hashFiles('VisionOps_AI_Studio_Setup.zip') != ''
         uses: actions/attest@v4
         with:
           subject-path: VisionOps_AI_Studio_Setup.zip
-          create-storage-record: false
       - name: Upload to existing release or publish new one
         env:
           GH_TOKEN: ${{ github.token }}
