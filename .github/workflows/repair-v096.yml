@@ -1,4 +1,5 @@
 name: Build compatibility update v0.9.6
+# Compatibility release is subsequently attested by the trusted publish-visionops workflow.
 on:
   push:
     branches: [main]
