@@ -110,3 +110,11 @@ Website, account creation, app licensing and GitHub release delivery have differ
 - Supabase admin role-checked RPC `visionops_admin_account_overview` shows account package/status/grant date/last signed-in, but only if the local desktop admin has also connected a Supabase admin cloud session. Never return password hashes.
 - Packages remain free prototype; no payment, billing, or new paid service.
 - Limitations: no end-to-end Windows/WebView test, no verified successful GitHub Action run, and current account duration only means enrollment/since granted, not total time used.
+
+## v0.9.6 — Backward-compatible update and one website editor
+- Fixed "Paket beklenmeyen dosya içeriyor" from old updaters by moving secure backup functions into already-approved `secure_store.py`. Update ZIP contains only files accepted by installed versions v0.9.0 through v0.9.5. Offline encrypted-backup restoration remains accessible via `secure_store.py --restore`.
+- One visual website editor at `docs/studio.html`, accessible from website admin. It no longer depends on a GrapesJS CDN or a fullscreen hack; the first canvas is populated from current live HTML/CSS or published `visionops_visual_pages`.
+- Features: live page selection, inline text editing, image URL, typography, backgrounds, cards, section templates, Openverse image picker, undo/redo, desktop/tablet/phone preview, and admin-only Supabase publishing. Work in progress: granular responsive layout controls and reliable in-browser UX testing.
+- GitHub Actions `repair-v096.yml` prepares compatibility packages from prior Release; trusted signer `publish-visionops.yml` consumes them after repair workflow success and emits persistently stored free provenance attestations.
+- The legacy installed app requires the trusted signer workflow, so a ZIP created directly without that attestation cannot be installed through the strict local updater. Use the app's Check for Updates after both workflows succeed.
+- Neither workflow success nor Windows and browser end-to-end functionality can be guaranteed from static source tests. Do not expose local admin/data services to the Internet.
