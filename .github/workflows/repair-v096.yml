@@ -1,0 +1,90 @@
+name: Build compatibility update v0.9.6
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-v096.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Get previous release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p old
+          gh release download v0.9.5 --repo "${{ github.repository }}" --pattern "VisionOps_AI_Studio_update.zip" --dir old
+          gh release download v0.9.5 --repo "${{ github.repository }}" --pattern "VisionOps_AI_Studio_Setup.zip" --dir old || true
+      - name: Create legacy-compatible package
+        run: |
+          python3 - <<'PY'
+          import json, zipfile, pathlib, re, hashlib
+          root='VisionOps_AI_Studio/'
+          previous=pathlib.Path('old/VisionOps_AI_Studio_update.zip')
+          legacy={'app.py','security.py','update_manager.py','studio.py','secure_store.py','launcher.pyw','version.json','requirements.txt','VisionOps.ico','templates/index.html','templates/login.html','templates/choose.html','templates/activate.html','static/dashboard.css','static/dashboard.js'}
+          def prepare(path,dest,update):
+              with zipfile.ZipFile(path) as z:
+                  entries={n:z.read(n) for n in z.namelist() if not n.endswith('/')}
+              if root+'secure_backup.py' not in entries: raise SystemExit('v0.9.5 backup module is missing')
+              backup=entries.pop(root+'secure_backup.py').decode('utf-8').split("if __name__ == '__main__':")[0]
+              app=entries[root+'app.py'].decode('utf-8')
+              if 'from secure_backup import create_encrypted_backup' not in app: raise SystemExit('Backup import changed unexpectedly')
+              entries[root+'app.py']=app.replace('from secure_backup import create_encrypted_backup','from secure_store import create_encrypted_backup').encode()
+              entries[root+'secure_store.py']+=(('\n# Bundled encrypted backup for legacy updater compatibility\n'+backup).encode())
+              entries[root+'version.json']=json.dumps({'version':'0.9.6'},indent=2).encode()
+              if root+'YEDEK_GERI_YUKLE.bat' in entries:
+                  contents=entries[root+'YEDEK_GERI_YUKLE.bat'].decode('utf-8-sig').replace('secure_backup.py','secure_store.py')
+                  entries[root+'YEDEK_GERI_YUKLE.bat']=contents.encode('utf-8-sig')
+              if root+'KURULUM.ps1' in entries:
+                  ps=entries[root+'KURULUM.ps1'].decode('utf-8-sig')
+                  ps=ps.replace("'secure_store.py','secure_backup.py','update_manager.py'","'secure_store.py','update_manager.py'")
+                  ps=ps.replace("'security.py','secure_store.py','secure_backup.py','update_manager.py'","'security.py','secure_store.py','update_manager.py'")
+                  entries[root+'KURULUM.ps1']=ps.encode('utf-8-sig')
+              if update:
+                  names={name[len(root):] for name in entries}
+                  if not names.issubset(legacy):raise SystemExit('Unknown update files: '+str(names-legacy))
+              for name in entries:
+                  if not name.startswith(root) or '..' in name.split('/'):raise SystemExit('Unexpected archive path: '+name)
+              with zipfile.ZipFile(dest,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+                  for name,blob in sorted(entries.items()): z.writestr(name,blob)
+              with zipfile.ZipFile(dest) as z:
+                  assert z.testzip() is None
+              print(dest,hashlib.sha256(pathlib.Path(dest).read_bytes()).hexdigest())
+          prepare(previous,'VisionOps_AI_Studio_update.zip',True)
+          setup=pathlib.Path('old/VisionOps_AI_Studio_Setup.zip')
+          if setup.exists():prepare(setup,'VisionOps_AI_Studio_Setup.zip',False)
+          PY
+      - name: Publish update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view v0.9.6 --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload v0.9.6 VisionOps_AI_Studio_update.zip --clobber --repo "${{ github.repository }}"
+          else
+            gh release create v0.9.6 VisionOps_AI_Studio_update.zip --repo "${{ github.repository }}" --target "${{ github.sha }}" --title "VisionOps AI Studio v0.9.6" --notes "Legacy-safe update: works with v0.9.0-v0.9.5 update allowlists. Encrypted backup embedded in secure_store.py."
+          fi
+          if [ -f VisionOps_AI_Studio_Setup.zip ]; then
+            gh release upload v0.9.6 VisionOps_AI_Studio_Setup.zip --clobber --repo "${{ github.repository }}"
+          fi
+      - name: Provenance attestation
+        uses: actions/attest@v4
+        continue-on-error: true
+        with:
+          subject-path: VisionOps_AI_Studio_update.zip
+          create-storage-record: false
+      - name: Confirm release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release view v0.9.6 --repo "${{ github.repository }}" --json tagName,assets --jq '{tag:.tagName,assets:[.assets[].name]}'
