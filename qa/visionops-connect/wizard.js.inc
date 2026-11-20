@@ -63,9 +63,9 @@ scan.onclick=async()=>{
   }catch(e){status.textContent=e.message||'Kamera keşfi başarısız.';}
   finally{busy=false;scan.disabled=false;}
 };
-for(const el of [username,password,path,profile]){
+for(const el of [username,password,path]){
   el.addEventListener('input',resetCheck);
-  el.addEventListener('change',()=>{if(el!==profile)resetCheck();});
+  el.addEventListener('change',resetCheck);
 }
 check.onclick=async()=>{
   if(!selected||busy||!form.reportValidity())return;
