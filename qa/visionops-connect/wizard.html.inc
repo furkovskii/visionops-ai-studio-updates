@@ -15,7 +15,7 @@
 .vo-connect-note{border-left:3px solid #b7a3dd;padding:8px 12px;margin-top:12px}
 </style>
 <div class="vo-connect-header"><div><h3>VisionOps Connect · Akıllı kamera kurulumu</h3><p class="vo-connect-hint">Önce kameraları bul, sonra bağlantı yetkisini doğrula. RTSP adresi tek başına görüntünün açıldığını kanıtlamaz.</p></div><button type="button" class="btn primary" id="vo-connect-scan">1 · Kameraları Bul</button></div>
-<label class="vo-connect-hint"><input type="checkbox" id="vo-connect-extended"> Gelişmiş yerel ağ taramasına izin ver (yalnızca bağlı olduğum ağların /24 adreslerinde RTSP 554 kontrolü; daha fazla trafik oluşturur)</label>
+<label class="vo-connect-hint"><input type="checkbox" id="vo-connect-extended"> Gelişmiş yerel ağ taramasına izin ver (yalnızca bağlı olduğum ağların /24 adreslerinde RTSP 554/8554 kontrolü; daha fazla trafik oluşturur)</label>
 <p id="vo-connect-status" role="status" aria-live="polite">Tarama başlatılmadı. Kameraların ve bilgisayarın yerel ağda erişilebilir olması gerekir.</p>
 <div id="vo-connect-devices" aria-label="Bulunan kameralar"></div>
 <form id="vo-connect-form" class="vo-connect-form" hidden autocomplete="off">
