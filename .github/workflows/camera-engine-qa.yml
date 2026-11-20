@@ -1,0 +1,33 @@
+name: Camera Engine release candidate QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'qa/camera-engine/**'
+      - '.github/workflows/camera-engine-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-camera:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild exact tested candidate
+        run: python qa/camera-engine/build.py
+      - name: Install decoder test dependencies
+        run: python -m pip install opencv-python numpy
+      - name: Native Windows decoder, timeout, pythonw and four local MJPEG streams
+        run: python qa/camera-engine/test_camera_engine.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VisionOps-Camera-Engine-v0.13.1-QA
+          path: |
+            camera-qa-build/VisionOps_AI_Studio_update.zip
+            camera-qa-build/VisionOps_AI_Studio_Setup.zip
+          if-no-files-found: error
+          retention-days: 14
