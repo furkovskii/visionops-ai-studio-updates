@@ -21,10 +21,35 @@ def patch_app(s):
     s=s[:a]+inc('media2.py.inc')+'\n\n'+s[b:]
     s=one(s,"@app.post('/api/workspace/onvif/discover')",
           inc('routes.py.inc')+"\n\n@app.post('/api/workspace/onvif/discover')")
+    # Network decoding is isolated from the UI/server with a bounded child
+    # process, watchdog and restartable connection. USB/OBS remains native.
+    a=s.index('def _open_universal_camera(protocol, source):')
+    b=s.index('\n\n# ---- Shared live camera inference',a)
+    s=s[:a]+inc('capture.py.inc')+s[b:]
+    s=one(s,"_open_universal_camera(camera['protocol'], camera['source'])",
+          "_open_universal_camera(camera['protocol'], camera['source'], camera['stop'])")
+    s=one(s,"'worker_alive':bool(camera.get('worker') and camera['worker'].is_alive())}",
+          "'worker_alive':bool(camera.get('worker') and camera['worker'].is_alive()),"
+          "'decoder_isolated':camera.get('protocol')!='usb',"
+          "'decoder_timeouts':camera.get('decoder_timeouts',0),"
+          "'decoder_exits':camera.get('decoder_exits',0)}")
+    s=one(s,"            except Exception:\n                # Do not propagate URL/credentials to status or browser logs.",
+          "            except Exception as exc:\n"
+          "                # Never include camera secrets or raw decoder errors in logs.\n"
+          "                if isinstance(exc,_CameraCaptureError):\n"
+          "                    if exc.reason=='decoder_timeout':camera['decoder_timeouts']=camera.get('decoder_timeouts',0)+1\n"
+          "                    elif exc.reason=='decoder_exit':camera['decoder_exits']=camera.get('decoder_exits',0)+1")
+    # Raw Python source inside a string is not checked by compiling app.py.
+    import ast
+    tree=ast.parse(s)
+    child=next(n.value.value for n in tree.body if isinstance(n,ast.Assign)
+               and any(isinstance(t,ast.Name) and t.id=='_NETWORK_CAPTURE_CHILD' for t in n.targets))
+    compile(child,'isolated_network_decoder','exec')
     return s
 def patch_html(s):
     s=one(s,'<details class="wall-add" open>',
           inc('wizard.html.inc')+'\n<details class="wall-add">')
+    s=one(s,"'Yeniden bağlantı: '+d.reconnects,...", "'Yeniden bağlantı: '+d.reconnects,...(d.decoder_isolated?['İzole ağ çözücü','Zaman aşımı: '+(d.decoder_timeouts??0)]:['USB/OBS']),...")
     js=inc('wizard.js.inc').replace("'__VO_CSRF_VALUE__'","{{ csrf|tojson }}")
     s=one(s,'async function onvifRequest(path,body){',
           js+'\nasync function onvifRequest(path,body){')
