@@ -37,6 +37,10 @@ jobs:
       - name: Validate wizard script
         shell: bash
         run: node --check - < qa/visionops-connect/wizard.js.inc
+      - name: Install isolated browser DOM test dependency
+        run: npm install --no-save --ignore-scripts jsdom@26.1.0
+      - name: Exercise interactive camera wizard and fallback paths
+        run: node qa/visionops-connect/test_wizard.mjs
       - uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'
         with:
