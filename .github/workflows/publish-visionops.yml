@@ -46,16 +46,16 @@ jobs:
           cp old/VisionOps_AI_Studio_update.zip release-input/v0.9.6.zip
           gh release download v0.9.6 --repo "${{ github.repository }}" --pattern VisionOps_AI_Studio_Setup.zip --dir old || true
           if [ -f old/VisionOps_AI_Studio_Setup.zip ]; then cp old/VisionOps_AI_Studio_Setup.zip setup-input/v0.9.6.zip; fi
-      - name: Build and retest verified VisionOps Connect v0.13.4
+      - name: Build and retest VisionOps Connect guided setup v0.13.5
         if: github.event_name != 'workflow_run'
         run: |
           set -euo pipefail
-          if python3 -c 'from pathlib import Path; print(max((tuple(map(int,p.stem[1:].split("."))) for p in Path("release-input").glob("v*.zip")),default=(0,0,0)) <= (0,13,4))' | grep -qx True; then
-            python3 qa/visionops-connect/build.py
-            python3 qa/visionops-connect/test_connect.py
-            node --check - < qa/visionops-connect/wizard.js.inc
-            cp connect-qa-build/VisionOps_AI_Studio_update.zip release-input/v0.13.4.zip
-            cp connect-qa-build/VisionOps_AI_Studio_Setup.zip setup-input/v0.13.4.zip
+          if python3 -c 'from pathlib import Path; print(max((tuple(map(int,p.stem[1:].split("."))) for p in Path("release-input").glob("v*.zip")),default=(0,0,0)) <= (0,13,5))' | grep -qx True; then
+            python3 qa/connect-usability/build.py
+            python3 qa/connect-usability/test_usability.py
+            node --check - < qa/connect-usability/wizard.js.inc
+            cp connect-usability-build/VisionOps_AI_Studio_update.zip release-input/v0.13.5.zip
+            cp connect-usability-build/VisionOps_AI_Studio_Setup.zip setup-input/v0.13.5.zip
           fi
       - name: Validate package and determine version
         id: build
