@@ -1,5 +1,13 @@
 # VisionOps AI Studio · Distribution & Update Center
 
+## Current repository layout
+
+- Current Windows release: [GitHub Releases](https://github.com/furkovskii/visionops-ai-studio-updates/releases/latest). Older installers and updates remain attached to their original releases.
+- `release-input/` and `setup-input/`: retained v0.13.0 reproducible base and v0.12.9 fallback only. Historical duplicates are removed only after SHA-256 equality with release assets is verified by CI. Git history remains intact.
+- `qa/ai-engine/`: active AI tracker build, tests and release integration. `android-update.json`: active Android update metadata. `docs/`: existing public redirects and compatibility pages.
+- Web/iOS/Android sources live separately in [visionops-ai-studio](https://github.com/furkovskii/visionops-ai-studio).
+
+
 **Website:** https://furkovskii.github.io/visionops-ai-studio-updates/ (GitHub Pages must be enabled: Settings → Pages → Deploy from branch → main → /docs).  
 **Windows installer:** https://github.com/furkovskii/visionops-ai-studio-updates/releases/latest/download/VisionOps_AI_Studio_Setup.zip  
 **Windows updates:** Published as `VisionOps_AI_Studio_update.zip` in GitHub Releases.
@@ -14,8 +22,8 @@
 
 ## How updates are published (developer only)
 GitHub Actions workflow: `.github/workflows/publish-visionops.yml`. Upload versioned ZIP archives to:
-- `release-input/v0.8.0.zip` → update file.
-- `setup-input/v0.8.0.zip` → fresh setup file.
+- `release-input/v0.13.0.zip` → pinned AI build input.
+- `setup-input/v0.13.0.zip` → pinned installer input.
 
 The workflow checks the internal version and releases the archives with the exact filenames expected by the app. The supplied Windows publisher uploads both files via GitHub CLI. App users just select “Check for updates” inside VisionOps.
 

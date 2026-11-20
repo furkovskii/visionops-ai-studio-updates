@@ -1,0 +1,52 @@
+name: Repository hygiene safety gate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'release-input/**'
+      - 'setup-input/**'
+      - '.github/**'
+      - 'docs/**'
+permissions:
+  contents: read
+jobs:
+  archive-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify every removed binary remains byte-identical in Releases
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > "$RUNNER_TEMP/releases.json"
+          python3 - <<'PY'
+          import hashlib,json,os,re,subprocess
+          from pathlib import Path
+          base=os.environ['BASE']
+          releases={r['tag_name']:r for r in json.loads((Path(os.environ['RUNNER_TEMP'])/'releases.json').read_text()) if not r['draft']}
+          deleted=subprocess.check_output(['git','diff','--diff-filter=D','--name-only',base,'HEAD'],text=True).splitlines()
+          checked=total=0
+          for name in deleted:
+              m=re.fullmatch(r'(release-input|setup-input)/(v[0-9.]+)\.zip',name)
+              if not m: continue
+              folder,tag=m.groups()
+              filename='VisionOps_AI_Studio_update.zip' if folder=='release-input' else 'VisionOps_AI_Studio_Setup.zip'
+              asset=next(a for a in releases[tag]['assets'] if a['name']==filename)
+              data=subprocess.check_output(['git','show',f'{base}:{name}'])
+              digest='sha256:'+hashlib.sha256(data).hexdigest()
+              assert asset['digest']==digest and asset['size']==len(data), (name,digest,asset['digest'])
+              checked+=1;total+=len(data)
+              print('Verified archived duplicate:',name,digest)
+          for folder in ('release-input','setup-input'):
+              for version in ('v0.13.0','v0.12.9'):
+                  assert (Path(folder)/(version+'.zip')).is_file()
+          assert Path('android-update.json').is_file()
+          for name in ('index','account','admin','studio','editor','page'):
+              assert (Path('docs')/(name+'.html')).is_file()
+          print(f'Verified {checked} removed archive duplicates, {total} bytes; desktop bases, Android manifest and Pages routes preserved.')
+          PY
