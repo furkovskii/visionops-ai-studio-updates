@@ -6,7 +6,7 @@ from types import SimpleNamespace
 ROOT=Path(__file__).resolve().parents[2];BASE=ROOT/'connect-usability-build'
 SOURCE=BASE/'VisionOps_AI_Studio'/'app.py'
 TREE=ast.parse(SOURCE.read_text(encoding='utf-8'))
-WANT={'_vo_interfaces','_discover_onvif','_vo_scan_rtsp','visionops_connect_scan'}
+WANT={'_private_ipv4','_vo_interfaces','_discover_onvif','_vo_scan_rtsp','visionops_connect_scan'}
 NODES=[n for n in TREE.body if getattr(n,'name',None) in WANT]
 assert len(NODES)==len(WANT)
 for node in NODES:
