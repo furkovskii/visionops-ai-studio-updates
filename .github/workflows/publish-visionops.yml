@@ -7,6 +7,12 @@ on:
       - 'release-input/*.zip'
       - 'setup-input/*.zip'
       - 'VisionOps_AI_Studio/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-visionops.yml'
+      - 'release-input/*.zip'
+      - 'setup-input/*.zip'
   workflow_dispatch:
   workflow_run:
     workflows: ["Build compatibility update v0.9.6"]
@@ -46,7 +52,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import os,json,re,hashlib,zipfile
+          import os,json,re,hashlib,zipfile,ast,subprocess
           from pathlib import Path
           allowed={'app.py','security.py','secure_store.py','update_manager.py','studio.py','launcher.pyw','version.json','requirements.txt','VisionOps.ico','templates/index.html','templates/login.html','templates/choose.html','templates/activate.html','static/dashboard.css','static/dashboard.js'}
           required={'app.py','version.json','templates/index.html','security.py','update_manager.py'}
@@ -56,10 +62,16 @@ jobs:
           newest = sorted(candidates, key=lambda p: tuple(map(int, p.stem[1:].split('.'))), reverse=True)[:1]
           for package in newest:
               with zipfile.ZipFile(package) as z:
+                  if z.testzip(): raise SystemExit('Corrupt update archive')
                   names=[name for name in z.namelist() if not name.endswith('/')]
+                  if any(not n.startswith('VisionOps_AI_Studio/') or '\\' in n or '..' in Path(n).parts for n in names): raise SystemExit('Unsafe update filename')
                   rel=[n.split('VisionOps_AI_Studio/',1)[-1] for n in names]
                   if len(set(rel))!=len(rel) or not required.issubset(set(rel)) or not set(rel).issubset(allowed):
                       raise SystemExit('Update incompatible with installed v0.9.2+ allowlist: '+str(package)+' (new modules must be embedded or shipped in a staged core upgrade)')
+                  for name in names:
+                      if name.endswith(('.py','.pyw')): ast.parse(z.read(name).decode('utf-8-sig'),filename=name)
+                      if name.endswith('.js'):
+                          subprocess.run(['node','--check','-'],input=z.read(name),check=True)
                   version=json.loads(z.read(names[rel.index('version.json')]))['version']
                   if not re.fullmatch(r'\d+\.\d+\.\d+',version) or package.stem!='v'+version:
                       raise SystemExit('Version filename mismatch: '+str(package))
@@ -87,7 +99,13 @@ jobs:
           setup=Path('setup-input') / ('v'+version+'.zip')
           if setup.exists():
               with zipfile.ZipFile(setup) as z:
+                  if z.testzip(): raise SystemExit('Corrupt setup archive')
                   names=set(z.namelist())
+                  if len(names)!=len(z.namelist()): raise SystemExit('Duplicate installer entries')
+                  with zipfile.ZipFile(package) as update:
+                      for n in update.namelist():
+                          if not n.endswith('/') and (n not in names or update.read(n)!=z.read(n)):
+                              raise SystemExit('Setup differs from update: '+n)
                   necessary={'VisionOps_AI_Studio/KURULUM_YAP.bat','VisionOps_AI_Studio/KURULUM.ps1','VisionOps_AI_Studio/app.py','VisionOps_AI_Studio/version.json'}
                   if not necessary.issubset(names):
                       raise SystemExit('Installer is missing mandatory files')
@@ -101,18 +119,33 @@ jobs:
                       if z.getinfo(n).file_size>20_000_000:
                           raise SystemExit('Oversized installer entry')
               shutil.copyfile(setup,'VisionOps_AI_Studio_Setup.zip')
+          if not setup.exists() and tuple(map(int,version.split('.'))) >= (0,12,7):
+              raise SystemExit('Matching complete installer is mandatory')
           print('Prepared v'+version,'sha256:',digest)
           PY
       - name: Sign update provenance (free Sigstore, public repository)
+        if: github.event_name != 'pull_request'
         uses: actions/attest@v4
         with:
           subject-path: VisionOps_AI_Studio_update.zip
       - name: Sign installer provenance
-        if: hashFiles('VisionOps_AI_Studio_Setup.zip') != ''
+        if: github.event_name != 'pull_request' && hashFiles('VisionOps_AI_Studio_Setup.zip') != ''
         uses: actions/attest@v4
         with:
           subject-path: VisionOps_AI_Studio_Setup.zip
+      - name: Verify trusted provenance before release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for f in VisionOps_AI_Studio_update.zip VisionOps_AI_Studio_Setup.zip; do
+            if [[ -f "$f" ]]; then
+              gh attestation verify "$f" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/publish-visionops.yml"
+            fi
+          done
       - name: Upload to existing release or publish new one
+        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.build.outputs.tag }}
@@ -120,12 +153,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          files=(VisionOps_AI_Studio_update.zip)
+          if [[ -f VisionOps_AI_Studio_Setup.zip ]]; then files+=(VisionOps_AI_Studio_Setup.zip); fi
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" VisionOps_AI_Studio_update.zip --clobber
+            gh release upload "$TAG" "${files[@]}" --clobber
           else
-            gh release create "$TAG" VisionOps_AI_Studio_update.zip --target "$GITHUB_SHA" --title "VisionOps AI Studio $TAG" --notes "Desktop update. SHA256: $HASH"
+            gh release create "$TAG" "${files[@]}" --draft --target "$GITHUB_SHA" --title "VisionOps AI Studio $TAG" --notes "Desktop update. SHA256: $HASH"
           fi
-          if [[ -f "VisionOps_AI_Studio_Setup.zip" ]]; then
-            gh release upload "$TAG" VisionOps_AI_Studio_Setup.zip --clobber
+          gh release view "$TAG" --json assets,isDraft
+          mkdir -p release-verify
+          gh release download "$TAG" --dir release-verify
+          for f in "${files[@]}"; do
+            cmp "$f" "release-verify/$f"
+            gh attestation verify "release-verify/$f" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/publish-visionops.yml"
+          done
+          if [[ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" == true ]]; then
+            gh release edit "$TAG" --draft=false --latest
           fi
-          gh release view "$TAG" --json assets --jq '.assets[].name'
+          gh release view "$TAG" --json assets,isDraft,url
