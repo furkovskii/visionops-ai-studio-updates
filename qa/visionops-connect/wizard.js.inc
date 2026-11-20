@@ -81,7 +81,7 @@ check.onclick=async()=>{
     if(!result.reachable)return;
     if(protocol==='onvif'){
       if(result.code!=='profiles'||!result.profiles?.length)return;
-      profile.replaceChildren(...result.profiles.map(p=>new Option(p.name,p.token)));
+      profile.replaceChildren(...result.profiles.map(p=>{const option=new Option(p.name,p.token);option.dataset.mode=p.mode||'media1';return option;}));
       $('vo-connect-profile-wrap').hidden=false;
     }else if(result.code!=='rtsp'){return;}
     verified=true;add.disabled=false;
@@ -98,7 +98,8 @@ form.onsubmit=async e=>{
   const data={action:'add',label:label.value.trim(),protocol:device.scheme==='rtsp'?'rtsp':'onvif',
       ip:device.ip,port:device.port,path:device.scheme==='rtsp'?path.value:device.path,
       username:username.value,password:password.value,onvif_scheme:device.scheme,
-      profile:device.scheme==='rtsp'?'':profile.value,remember:$('vo-connect-remember').checked};
+      profile:device.scheme==='rtsp'?'':profile.value,
+      onvif_mode:device.scheme==='rtsp'?'media1':(profile.selectedOptions[0]?.dataset.mode||'media1'),remember:$('vo-connect-remember').checked};
   try{
     const ok=await loadCameras(data);
     if(ticket!==nonce)return;
