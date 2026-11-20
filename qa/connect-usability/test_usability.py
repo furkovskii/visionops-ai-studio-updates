@@ -77,7 +77,7 @@ class LocalUsabilityTests(unittest.TestCase):
         for required in ['id="vo-scan-progress"','class="vo-radar"','id="vo-connect-fallback"',
                          'id="vo-help-brand"','id="vo-help-question"','id="vo-help-ask"',
                          'id="vo-connect-manual-slot"',"'/api/workspace/connect/scan',{extended:true}",
-                         'id="vo-scan-retry"','vo-help-card']:
+                         'id="vo-scan-retry"','vo-help-card','id="vo-connect-device-brand"']:
             self.assertIn(required,markup)
         self.assertNotIn('vo-connect-extended',markup)
         self.assertNotIn("window.open(",markup[markup.index('// VisionOps Connect wizard.'):])
