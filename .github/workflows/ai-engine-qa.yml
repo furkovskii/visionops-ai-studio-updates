@@ -1,0 +1,36 @@
+name: AI Engine release candidate QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'qa/ai-engine/**'
+      - '.github/workflows/ai-engine-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tracking:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild from SHA-256 verified v0.13.0 packages
+        run: python qa/ai-engine/build.py
+      - name: Anonymous multi-module tracking and persisted reports
+        run: python qa/ai-engine/test_ai_engine.py
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: VisionOps-AI-Engine-v0.13.2-QA
+          path: |
+            ai-qa-build/VisionOps_AI_Studio_update.zip
+            ai-qa-build/VisionOps_AI_Studio_Setup.zip
+          if-no-files-found: error
+          retention-days: 14
