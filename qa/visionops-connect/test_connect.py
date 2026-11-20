@@ -7,12 +7,14 @@ SOURCE=ROOT/'connect-qa-build'/'VisionOps_AI_Studio'/'app.py'
 TREE=ast.parse(SOURCE.read_text(encoding='utf-8'))
 NAMES={'_private_ipv4','_safe_xml','_local_endpoint','_vo_interfaces','_vo_parse_probe',
        '_discover_onvif','_vo_probe_rtsp','_vo_scan_rtsp','_vo_connect_check',
-       '_vo_media2_profiles','_vo_media2_source','_onvif_source','_camera_source'}
+       '_vo_media2_profiles','_vo_media2_source','_onvif_source','_camera_source','_vo_rate_limit'}
 NODES=[node for node in TREE.body if getattr(node,'name',None) in NAMES]
 assert len(NODES)==len(NAMES),(len(NODES),len(NAMES))
 class CloudError(Exception):pass
 exec(compile(ast.Module(body=NODES,type_ignores=[]),str(SOURCE),'exec'),globals())
 _DISCOVERY_LOCK=threading.Lock()
+_VO_RATE_LOCK=threading.Lock()
+_VO_RATE={}
 def probe_xml(mid,peer='192.168.2.15',host=None):
     host=host or peer
     return (f'<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" '
@@ -115,6 +117,42 @@ class ConnectTests(unittest.TestCase):
         with mock.patch('socket.create_connection',return_value=FakeTcp()),mock.patch.dict(globals(),{'_vo_probe_rtsp':lambda *args:True}):
             out=_vo_connect_check({'ip':'192.168.19.2','protocol':'rtsp'})
         self.assertFalse(out['stream_verified']);self.assertEqual(out['code'],'rtsp')
+    def test_discovery_uses_each_local_adapter(self):
+        import select,time
+        sockets=[]
+        class DummyUdp:
+            def __init__(self,*args):self.bound=None;self.packet=None;self.responded=False;sockets.append(self)
+            def __enter__(self):return self
+            def __exit__(self,*args):self.close()
+            def setsockopt(self,*args):pass
+            def bind(self,where):self.bound=where[0]
+            def sendto(self,packet,destination):
+                self.packet=packet
+                self.assert_destination=destination
+            def recvfrom(self,limit):
+                self.responded=True
+                mid=ET.fromstring(self.packet).findtext('.//{*}MessageID')
+                ip='192.168.'+('11' if self.bound.endswith('.2') else '12')+'.35'
+                return probe_xml(mid,peer=ip),(ip,3702)
+            def close(self):pass
+        clock=[0.]
+        def tick():clock[0]+=.15;return clock[0]
+        with mock.patch.dict(globals(),{'_vo_interfaces':lambda:['192.168.11.2','192.168.12.2']}),\
+             mock.patch('socket.socket',side_effect=DummyUdp),\
+             mock.patch('select.select',side_effect=lambda items,*args:([x for x in items if not x.responded],[],[])),\
+             mock.patch('time.monotonic',side_effect=tick):
+            found=_discover_onvif(timeout=1)
+        self.assertEqual(len(sockets),2)
+        self.assertTrue(all(s.assert_destination==('239.255.255.250',3702) for s in sockets))
+        self.assertEqual(len(found),2)
+    def test_rate_limit_is_bound_to_owner_and_window(self):
+        _VO_RATE.clear()
+        with mock.patch('time.monotonic',return_value=20):
+            for _ in range(3):_vo_rate_limit('owner-a','check',60,3)
+            with self.assertRaises(CloudError):_vo_rate_limit('owner-a','check',60,3)
+            _vo_rate_limit('owner-b','check',60,3)
+        with mock.patch('time.monotonic',return_value=81):
+            _vo_rate_limit('owner-a','check',60,3)
     def test_route_scope_guards(self):
         for func in ['visionops_connect_scan','visionops_connect_check']:
             method=next(n for n in TREE.body if isinstance(n,ast.FunctionDef) and n.name==func)
