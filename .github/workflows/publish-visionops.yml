@@ -46,11 +46,16 @@ jobs:
           cp old/VisionOps_AI_Studio_update.zip release-input/v0.9.6.zip
           gh release download v0.9.6 --repo "${{ github.repository }}" --pattern VisionOps_AI_Studio_Setup.zip --dir old || true
           if [ -f old/VisionOps_AI_Studio_Setup.zip ]; then cp old/VisionOps_AI_Studio_Setup.zip setup-input/v0.9.6.zip; fi
-      - name: Build verified v0.12.8 archives from pinned v0.12.7 base
+      - name: Build and retest verified AI Engine v0.13.2
         if: github.event_name != 'workflow_run'
         run: |
           set -euo pipefail
-          python3 .github/scripts/build_v0128.py
+          if python3 -c 'from pathlib import Path; print(max((tuple(map(int,p.stem[1:].split("."))) for p in Path("release-input").glob("v*.zip")),default=(0,0,0)) <= (0,13,2))' | grep -qx True; then
+            python3 qa/ai-engine/build.py
+            python3 qa/ai-engine/test_ai_engine.py
+            cp ai-qa-build/VisionOps_AI_Studio_update.zip release-input/v0.13.2.zip
+            cp ai-qa-build/VisionOps_AI_Studio_Setup.zip setup-input/v0.13.2.zip
+          fi
       - name: Validate package and determine version
         id: build
         shell: bash
