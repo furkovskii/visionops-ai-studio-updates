@@ -1,0 +1,309 @@
+{
+  "base": "47ed68847c540ea661c301e1fbda5c859cd43519",
+  "files": [
+    {
+      "path": "release-input/v0.10.0.zip",
+      "tag": "v0.10.0",
+      "size": 97357,
+      "sha256": "0376f2d97f20511b1b59f9222c973a75b19a3827a771669067f016b8e00530f4",
+      "blob": "cff5b506c59cdd74aca4ba4023b4bd27285747e7",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.10.1.zip",
+      "tag": "v0.10.1",
+      "size": 109078,
+      "sha256": "a1d4fb009cf0e4f91fc6882c5527b59b800a0351b978e53126ef841be9c6e79f",
+      "blob": "9712b009558de38f210424f824a43b8c46bbf0bb",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.10.2.zip",
+      "tag": "v0.10.2",
+      "size": 157583,
+      "sha256": "b73dc890820d5b7f506e0899aefac41030cebc7a64b91d4da8ea3cb036013f6f",
+      "blob": "42308c71c02497e56b34fd7a95952351b5be607d",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.10.3.zip",
+      "tag": "v0.10.3",
+      "size": 160850,
+      "sha256": "f74e39cde225848f1dc2efbaead3182dbaa96a0e3bb03ac90023e4cac2868d9a",
+      "blob": "7462537a4170d27675e1bd4543c9cab71008cc65",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.10.4.zip",
+      "tag": "v0.10.4",
+      "size": 163895,
+      "sha256": "88cb44adb019bce8a9f1c3c1a2e86ad466dbe9059938233ea908a034151c920e",
+      "blob": "e376814a9b4f01af54aa7848982d43f210f7e938",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.10.5.zip",
+      "tag": "v0.10.5",
+      "size": 165576,
+      "sha256": "5783c2fc5dc35888f0b0562c9d46044a9e43ff0ce9aebb9f9dc42f7203c7ddd5",
+      "blob": "e11d2c56123aa98aa50c182e0ffd7de56de228de",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.10.9.zip",
+      "tag": "v0.10.9",
+      "size": 187402,
+      "sha256": "23b36286df4b6812707be6883e57dbc9aa30d2f2027a622563b81304ffc7cfcb",
+      "blob": "ca715c9b7f7868e10eeaec2a79076b9c31c29884",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.11.4.zip",
+      "tag": "v0.11.4",
+      "size": 212265,
+      "sha256": "aadbbd7f73ba61aa725f6674f9a64bb91769ac17e86912e2d1b17cdd98854861",
+      "blob": "a208444cefcc4faabda59dda023bbb8dc958219c",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.12.0.zip",
+      "tag": "v0.12.0",
+      "size": 228946,
+      "sha256": "66af59e1b2831ff1db6770804f93e6150782e68c76135118ec0af4c9090fde68",
+      "blob": "393b626f2e2491fa45a9269833230381fd2fbcfe",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.12.6.zip",
+      "tag": "v0.12.6",
+      "size": 239017,
+      "sha256": "e3a8eba3e9bb5a7ea55d9552b3ba3072178043a67d415007bdf8f8aef085aa15",
+      "blob": "b8ab153fc412acc73b7f98f1f72fe229e5533ad8",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.5.1.zip",
+      "tag": "v0.5.1",
+      "size": 66242,
+      "sha256": "f08163428cc570896a54bdc7d8dfa22ec234c21da018b57e6f411f76f37fd2fa",
+      "blob": "d76cd024a3b6752f982d7497d895423b99637998",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.6.0.zip",
+      "tag": "v0.6.0",
+      "size": 70248,
+      "sha256": "38197ed1fa0a448ac9f2d43391bc2a8fc9d11d62f23e4407fd13837633356c3f",
+      "blob": "6d526095578ca82a274771a5c6f12ee631226ac2",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.7.0.zip",
+      "tag": "v0.7.0",
+      "size": 72229,
+      "sha256": "4e541793dad19b626a1a9b9bf99b1a1837202d8665aa59f1a342db128a84e1cf",
+      "blob": "4292c2d3c6a2826f709a510db56b46bd58515ac4",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.8.0.zip",
+      "tag": "v0.8.0",
+      "size": 77923,
+      "sha256": "03bf8ca20c7f274b3d06933a4cbeb1ec81e2199c8e72c9500d172ec891010250",
+      "blob": "5ff74f07c46098060e5ea4af756e9b255e53cb36",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.9.0.zip",
+      "tag": "v0.9.0",
+      "size": 82146,
+      "sha256": "fc8f343da794123df950525dc78eeb9f98b8df8acf8f4a2ba3260c680b5f7243",
+      "blob": "0e2c9388ce03a790fbaf8ea4451445be79345d67",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.9.3.zip",
+      "tag": "v0.9.3",
+      "size": 92847,
+      "sha256": "cbb3b3e2bfc1a17b30d9a3438792e689b20ac1ab21a826b6be8e94fccfe40718",
+      "blob": "d1d7d152fb7015e4b6d2ab4cfb176dc0e7e4a48a",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.9.4.zip",
+      "tag": "v0.9.4",
+      "size": 97151,
+      "sha256": "cbc6b0d810e103a0ad4a17a510f31e8d8d21ebba4dfde7d3bff6f6e818a68d9c",
+      "blob": "151841a1a5cd18be28c813ab48744f4d0b8ba879",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.9.7.zip",
+      "tag": "v0.9.7",
+      "size": 92992,
+      "sha256": "f074ac359dc4ca3798601a2e3245f9d196a11a88e802132d87c059aa3906f402",
+      "blob": "2b1701053270f7cc44d920d838ba96c76208a657",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.9.8.zip",
+      "tag": "v0.9.8",
+      "size": 94297,
+      "sha256": "cc6e9db74a65752175dc658a155cf61083bfb2809e67770b0ee63be2d61ee3da",
+      "blob": "f6fe646c653ec137f31d6136bc01e6b56746c305",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "release-input/v0.9.9.zip",
+      "tag": "v0.9.9",
+      "size": 96041,
+      "sha256": "11ce2fa402d4d9d47b5cf7dfecf60f8f72573e18af30362d55bcae8c7ccca2b7",
+      "blob": "929af654d14ca3fa664e18817592a56c498b6de0",
+      "asset": "VisionOps_AI_Studio_update.zip"
+    },
+    {
+      "path": "setup-input/v0.10.0.zip",
+      "tag": "v0.10.0",
+      "size": 102113,
+      "sha256": "60be75fa8462d4c984c0515cc07dd89fcb81e86b00033778d67054a462e0cc67",
+      "blob": "a415f087f7670f32c3e4c467fa22795202668af9",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.10.1.zip",
+      "tag": "v0.10.1",
+      "size": 113834,
+      "sha256": "c4a8a117e9fefd817ca686a277d9db003e07d55941214c6ee7a831b89cde55e6",
+      "blob": "b42e45facc700bcfc46a102f531cb18b56e8428c",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.10.2.zip",
+      "tag": "v0.10.2",
+      "size": 162339,
+      "sha256": "69fc909ddf6117a894be0cac9021a098c76fce5d85ca1d2dec35f7aa9e74ab7b",
+      "blob": "70ca7a689fe7de8047ac8ec80cb2b0f51acc020d",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.10.3.zip",
+      "tag": "v0.10.3",
+      "size": 165606,
+      "sha256": "e83bfdb04d0150279534063cde29390d8d3f70d764eff7e36ac812ecbb33172b",
+      "blob": "7159cf9328967b68522a929713f4ec6e6bccce34",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.10.4.zip",
+      "tag": "v0.10.4",
+      "size": 168651,
+      "sha256": "51404075dfd198124df51a98d0e470251d6084d50168d418c7826c1dbdaab5af",
+      "blob": "26edec1ba0ef80d0facbaddf77a19ebd319986df",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.10.5.zip",
+      "tag": "v0.10.5",
+      "size": 170326,
+      "sha256": "774aa51fa4248b158b49e2c69bbb5527dfebdfb63a2dec7e293fbcc056e3faaf",
+      "blob": "15959cd8f9087fd09222183ebe200a6a7cf4d52d",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.10.9.zip",
+      "tag": "v0.10.9",
+      "size": 192167,
+      "sha256": "a5410f3df53e737a76a6ad7b54513f9a4f7eac78aa01411b7c8e8ea52461636c",
+      "blob": "ea85a92e9d3914eaaf36a5eb89aee65fb839c8f5",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.11.4.zip",
+      "tag": "v0.11.4",
+      "size": 221629,
+      "sha256": "1a26a7f9fe294cb30afd5aa35f71e529b3ff0f3fd3bcc608a4627d9717e8c402",
+      "blob": "2e740659c037522a3632e57771ae8760a03e2471",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.12.0.zip",
+      "tag": "v0.12.0",
+      "size": 238579,
+      "sha256": "a8d0ddc94dab7f1dc07da5c198065411f3f99192df0b5bfd6f6dd5426546d1c0",
+      "blob": "da408d3609db8f8617b83d7061b01a9ff0f4f523",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.12.6.zip",
+      "tag": "v0.12.6",
+      "size": 249529,
+      "sha256": "d019c4df19617b0d304528f75fcd10fa7b076478994ebc0bb62a90ee89671fbf",
+      "blob": "23ae6155869d4ed371b68ff0b2a329bde2164256",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.7.0.zip",
+      "tag": "v0.7.0",
+      "size": 76530,
+      "sha256": "fc39081ccc251117582d8a3139b60ff74a8f2c8d81321af320d517abd795dd66",
+      "blob": "63d5025e97813cdb331ca9a76f7d4ef6600c64b3",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.8.0.zip",
+      "tag": "v0.8.0",
+      "size": 82228,
+      "sha256": "891f99ba7d6426f233da4aad657109844d8ed0ac86e455b9843f49fa54a3e9ed",
+      "blob": "6ee08086ed406ef0bc7b469417caa4518c85cf51",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.9.0.zip",
+      "tag": "v0.9.0",
+      "size": 86451,
+      "sha256": "94e27a9fe8d42a29478fc5425cb8357c05ba36a9d677ffa68c00ef55458fa2ad",
+      "blob": "6b7ab8a0bfb878c8da9ec432879482f26492f9fb",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.9.3.zip",
+      "tag": "v0.9.3",
+      "size": 97152,
+      "sha256": "75f07e094b412baf71d83c804c745720d679a8b4c9a46e5df52c812699399e5c",
+      "blob": "affc539eba51b8bd5a5465bce932f617aca15c28",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.9.4.zip",
+      "tag": "v0.9.4",
+      "size": 101844,
+      "sha256": "af7ba4622d38b1b49c7c6f45e3ff41b6613d7a9390aaa14b59dbfac9d11148da",
+      "blob": "be7de949abd0e767f833bdfa5fc4ce8a7c5edad4",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.9.7.zip",
+      "tag": "v0.9.7",
+      "size": 97748,
+      "sha256": "b8a4e568a530af778acbb350db4ace89cc42c32d990174616b64a5abd202aea7",
+      "blob": "6a370340911ce2eceabd2a88d901bc9f9877d032",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.9.8.zip",
+      "tag": "v0.9.8",
+      "size": 99053,
+      "sha256": "6121c18690d6f55f0ef266fd80f330d36ae29efc73bcf8c0d8f41ae1331d1758",
+      "blob": "918f5ba5f06292322f12edaabed1a2525dfd516a",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    },
+    {
+      "path": "setup-input/v0.9.9.zip",
+      "tag": "v0.9.9",
+      "size": 100797,
+      "sha256": "b9044b0e57d89cc39870a3ae05f135ec7e3dfb11c2afaf0e580a402ffd1392d4",
+      "blob": "7981eda8f6090774ced8bb667d5049f4268d5810",
+      "asset": "VisionOps_AI_Studio_Setup.zip"
+    }
+  ]
+}
