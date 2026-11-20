@@ -1,0 +1,1 @@
+<div style="margin:12px 0"><h3>VisionOps Insights · Saatlik değişim</h3><div id="vo-smart-trend" role="status">Yeterli kayıt bekleniyor.</div></div><label>Yoğunluk dönemi <select id="vo-heat-period"><option value="1">Bugün</option><option value="7" selected>Son 7 gün</option><option value="30">Son 30 gün</option></select></label>
