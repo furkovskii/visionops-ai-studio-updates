@@ -46,6 +46,11 @@ jobs:
           cp old/VisionOps_AI_Studio_update.zip release-input/v0.9.6.zip
           gh release download v0.9.6 --repo "${{ github.repository }}" --pattern VisionOps_AI_Studio_Setup.zip --dir old || true
           if [ -f old/VisionOps_AI_Studio_Setup.zip ]; then cp old/VisionOps_AI_Studio_Setup.zip setup-input/v0.9.6.zip; fi
+      - name: Build verified v0.12.8 archives from pinned v0.12.7 base
+        if: github.event_name != 'workflow_run'
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/build_v0128.py
       - name: Validate package and determine version
         id: build
         shell: bash
