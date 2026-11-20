@@ -46,17 +46,16 @@ jobs:
           cp old/VisionOps_AI_Studio_update.zip release-input/v0.9.6.zip
           gh release download v0.9.6 --repo "${{ github.repository }}" --pattern VisionOps_AI_Studio_Setup.zip --dir old || true
           if [ -f old/VisionOps_AI_Studio_Setup.zip ]; then cp old/VisionOps_AI_Studio_Setup.zip setup-input/v0.9.6.zip; fi
-      - name: Build and retest verified Smart Analytics v0.13.3
+      - name: Build and retest verified VisionOps Connect v0.13.4
         if: github.event_name != 'workflow_run'
         run: |
           set -euo pipefail
-          if python3 -c 'from pathlib import Path; print(max((tuple(map(int,p.stem[1:].split("."))) for p in Path("release-input").glob("v*.zip")),default=(0,0,0)) <= (0,13,3))' | grep -qx True; then
-            python3 qa/smart-analytics/build.py
-            python3 qa/smart-analytics/test_smart.py
-            node --check - < qa/smart-analytics/rules.js.inc
-            node --check - < qa/smart-analytics/report.js.inc
-            cp smart-qa-build/VisionOps_AI_Studio_update.zip release-input/v0.13.3.zip
-            cp smart-qa-build/VisionOps_AI_Studio_Setup.zip setup-input/v0.13.3.zip
+          if python3 -c 'from pathlib import Path; print(max((tuple(map(int,p.stem[1:].split("."))) for p in Path("release-input").glob("v*.zip")),default=(0,0,0)) <= (0,13,4))' | grep -qx True; then
+            python3 qa/visionops-connect/build.py
+            python3 qa/visionops-connect/test_connect.py
+            node --check - < qa/visionops-connect/wizard.js.inc
+            cp connect-qa-build/VisionOps_AI_Studio_update.zip release-input/v0.13.4.zip
+            cp connect-qa-build/VisionOps_AI_Studio_Setup.zip setup-input/v0.13.4.zip
           fi
       - name: Validate package and determine version
         id: build

@@ -10,8 +10,17 @@ const username=$('vo-connect-user'), password=$('vo-connect-pass'), label=$('vo-
 const path=$('vo-connect-path'), profile=$('vo-connect-profile'), add=$('vo-connect-add'), check=$('vo-connect-check');
 const csrf='__VO_CSRF_VALUE__';
 let selected=null,verified=false,nonce=0,busy=false;
+const steps=[...document.querySelectorAll('#vo-connect-steps li')];
+function stage(current){
+  for(const [i,li] of steps.entries()){
+    li.dataset.state=i<current?'done':i===current?'active':'pending';
+    if(i===current)li.setAttribute('aria-current','step');
+    else li.removeAttribute('aria-current');
+  }
+}
+stage(0);
 function message(value){note.textContent=value;}
-function resetCheck(){verified=false;add.disabled=true;profile.replaceChildren(new Option('Önce bağlantıyı denetle',''));$('vo-connect-profile-wrap').hidden=true;}
+function resetCheck(){nonce++;stage(selected?1:0);verified=false;add.disabled=true;profile.replaceChildren(new Option('Önce bağlantıyı denetle',''));$('vo-connect-profile-wrap').hidden=true;}
 function manual(){const old=document.querySelector('.wall-add');if(old){old.open=true;old.scrollIntoView({block:'start',behavior:'smooth'});}}
 $('vo-connect-manual').onclick=manual;
 function selectDevice(item){
@@ -26,6 +35,7 @@ function selectDevice(item){
   $('vo-connect-selected').textContent=item.ip+':'+item.port+' · '+(item.scheme==='rtsp'?'RTSP cihazı':'ONVIF kamera/kayıt cihazı');
   form.hidden=false;
   resetCheck();
+  stage(1);
   message(item.scheme==='rtsp'
     ?'RTSP servisi algılandı. Yayın yolunu cihazın modeline göre kontrol edin. Bağlantı denetimi gerçek görüntüyü henüz doğrulamaz.'
     :'ONVIF hizmeti bulundu. Kamera hesabını girin ve video profillerini alın. NVR kullanıyorsanız kanallardan birini seçebilirsiniz.');
@@ -41,7 +51,7 @@ async function api(url,body){
 scan.onclick=async()=>{
   if(busy)return;
   busy=true;scan.disabled=true;status.textContent='Yerel ağda ONVIF kameralar aranıyor'+(extended.checked?' · izinli RTSP taraması da yapılacak':'')+'…';
-  form.hidden=true;selected=null;nonce++;password.value='';list.replaceChildren();
+  form.hidden=true;selected=null;nonce++;stage(0);password.value='';list.replaceChildren();
   try{
     const result=await api('/api/workspace/connect/scan',{extended:extended.checked});
     const devices=Array.isArray(result.devices)?result.devices:[];
@@ -84,7 +94,7 @@ check.onclick=async()=>{
       profile.replaceChildren(...result.profiles.map(p=>{const option=new Option(p.name,p.token);option.dataset.mode=p.mode||'media1';return option;}));
       $('vo-connect-profile-wrap').hidden=false;
     }else if(result.code!=='rtsp'){return;}
-    verified=true;add.disabled=false;
+    verified=true;stage(2);add.disabled=false;
   }catch(e){if(ticket===nonce)message(e.message||'Cihaza erişilemedi.');}
   finally{busy=false;check.disabled=false;}
 };
@@ -111,7 +121,7 @@ form.onsubmit=async e=>{
     async function watch(attempt){
       if(ticket!==nonce)return;
       const current=cameras.find(c=>c.id===camera.id);
-      if(current?.status==='Canlı'){message('Canlı görüntü doğrulandı · '+current.name+' bağlı. AI analizi kamera kartından etkinleştirilebilir.');return;}
+      if(current?.status==='Canlı'){stage(3);message('Canlı görüntü doğrulandı · '+current.name+' bağlı. AI analizi kamera kartından etkinleştirilebilir.');return;}
       if(attempt>=10){message('Kamera kaydı oluşturuldu, fakat canlı görüntü henüz doğrulanamadı. Ağ, profil ve yayın yolunu kontrol edin; kamera listesinde yeniden deneyin.');return;}
       await new Promise(done=>setTimeout(done,2500));
       if(ticket!==nonce)return;
