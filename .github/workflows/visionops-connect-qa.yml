@@ -15,7 +15,7 @@ jobs:
       matrix:
         os: [windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -28,6 +28,12 @@ jobs:
         run: python qa/visionops-connect/build.py
       - name: Test network safety and multi-vendor ONVIF Media1 and Media2 onboarding
         run: python qa/visionops-connect/test_connect.py
+      - name: Install native decoder test dependencies
+        if: runner.os == 'Windows'
+        run: python -m pip install numpy opencv-python
+      - name: Four concurrent local MJPEG streams, Windows decoder and automatic recovery
+        if: runner.os == 'Windows'
+        run: python qa/visionops-connect/test_decoder.py
       - name: Validate wizard script
         shell: bash
         run: node --check - < qa/visionops-connect/wizard.js.inc
