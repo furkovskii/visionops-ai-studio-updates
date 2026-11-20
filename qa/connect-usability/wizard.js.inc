@@ -38,6 +38,16 @@ $('vo-manual-reveal').onclick=()=>manual();
 const list=$('vo-connect-devices'), form=$('vo-connect-form'), note=$('vo-connect-help');
 const username=$('vo-connect-user'), password=$('vo-connect-pass'), label=$('vo-connect-label');
 const path=$('vo-connect-path'), profile=$('vo-connect-profile'), add=$('vo-connect-add'), check=$('vo-connect-check');
+const rtspBrand=$('vo-connect-device-brand');
+const rtspPresets={auto:'/stream1',tapo:'/stream1',mercusys:'/stream1',
+    hikvision:'/Streaming/Channels/101',dahua:'/cam/realmonitor?channel=1&subtype=0',
+    imou:'/cam/realmonitor?channel=1&subtype=0',reolink:'/h264Preview_01_main'};
+rtspBrand.addEventListener('change',()=>{
+  if(rtspPresets[rtspBrand.value])path.value=rtspPresets[rtspBrand.value];
+  if(rtspBrand.value==='other')$('vo-connect-stream-details').open=true;
+  resetCheck();
+});
+
 const csrf='__VO_CSRF_VALUE__';
 let selected=null,verified=false,nonce=0,busy=false;
 const steps=[...document.querySelectorAll('#vo-connect-steps li')];
@@ -64,7 +74,11 @@ function selectDevice(item){
   password.value='';
   username.value='';
   label.value=('Kamera '+item.ip).slice(0,40);
-  path.value=item.scheme==='rtsp'?'/stream1':item.path;
+  rtspBrand.value='auto';
+  path.value=item.scheme==='rtsp'?rtspPresets.auto:item.path;
+  $('vo-connect-brand-wrap').hidden=item.scheme!=='rtsp';
+  $('vo-connect-stream-details').hidden=item.scheme!=='rtsp';
+  $('vo-connect-stream-details').open=false;
   $('vo-connect-path-wrap').hidden=item.scheme!=='rtsp';
   $('vo-connect-selected').textContent=item.ip+':'+item.port+' · '+(item.scheme==='rtsp'?'RTSP cihazı':'ONVIF kamera/kayıt cihazı');
   form.hidden=false;
