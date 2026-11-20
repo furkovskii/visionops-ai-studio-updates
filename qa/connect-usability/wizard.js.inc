@@ -84,7 +84,7 @@ async function api(url,body){
 }
 scan.onclick=async()=>{
   if(busy)return;
-  busy=true;scan.disabled=true;status.textContent='Yerel ağda ONVIF kameralar aranıyor'+(extended.checked?' · izinli RTSP taraması da yapılacak':'')+'…';
+  busy=true;scan.disabled=true;status.textContent='Kameralarınız yerel ağda aranıyor…';
   form.hidden=true;fallback.hidden=true;selected=null;nonce++;stage(0);password.value='';list.replaceChildren();
   activity.hidden=false;activityText.textContent='Kameralarınız aranıyor…';
   activityDetail.textContent='Önce yerel ağdaki kamera ve kayıt cihazları kontrol ediliyor.';
