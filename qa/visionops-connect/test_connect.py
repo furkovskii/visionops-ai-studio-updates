@@ -1,5 +1,5 @@
 """Offline safety and compatibility tests. Real devices are a separate release gate."""
-import ast,json,os,socket,threading,unittest,uuid,xml.etree.ElementTree as ET,zipfile
+import ast,json,os,socket,threading,time,unittest,uuid,xml.etree.ElementTree as ET,zipfile
 from unittest import mock
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
@@ -132,7 +132,7 @@ class ConnectTests(unittest.TestCase):
             def recvfrom(self,limit):
                 self.responded=True
                 mid=ET.fromstring(self.packet).findtext('.//{*}MessageID')
-                ip='192.168.'+('11' if self.bound.endswith('.2') else '12')+'.35'
+                ip='.'.join(self.bound.split('.')[:3])+'.35'
                 return probe_xml(mid,peer=ip),(ip,3702)
             def close(self):pass
         clock=[0.]
