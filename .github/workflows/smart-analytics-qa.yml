@@ -1,0 +1,44 @@
+name: Smart Analytics desktop candidate QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'qa/smart-analytics/**'
+      - '.github/workflows/smart-analytics-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smart:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build isolated v0.13.3 candidate from verified v0.13.2 reconstruction
+        run: python qa/smart-analytics/build.py
+      - name: Test scenarios, coverage, persistence and isolation
+        run: python qa/smart-analytics/test_smart.py
+      - name: Check inserted JavaScript
+        shell: bash
+        run: |
+          node --check - < qa/smart-analytics/rules.js.inc
+          node --check - < qa/smart-analytics/report.js.inc
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: VisionOps-Smart-Analytics-v0.13.3-QA
+          path: |
+            smart-qa-build/VisionOps_AI_Studio_update.zip
+            smart-qa-build/VisionOps_AI_Studio_Setup.zip
+          if-no-files-found: error
+          retention-days: 14
