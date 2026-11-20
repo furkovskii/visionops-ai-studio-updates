@@ -70,6 +70,7 @@ def _discover_onvif(timeout=3.5):
                 '</d:Probe></s:Body></s:Envelope>').encode()
         interfaces=_vo_interfaces()
         for ip in interfaces or ['']:
+            sock=None
             try:
                 sock=socket.socket(socket.AF_INET,socket.SOCK_DGRAM,socket.IPPROTO_UDP)
                 sock.setsockopt(socket.IPPROTO_IP,socket.IP_MULTICAST_TTL,1)
@@ -78,8 +79,9 @@ def _discover_onvif(timeout=3.5):
                 sock.sendto(packet,('239.255.255.250',3702))
                 sockets.append(sock)
             except OSError:
-                try:sock.close()
-                except Exception:pass
+                if sock is not None:
+                    try:sock.close()
+                    except OSError:pass
         if not sockets:return []
         end=time.monotonic()+timeout;found={}
         while len(found)<64 and time.monotonic()<end:
@@ -139,7 +141,8 @@ def _vo_connect_check(form):
     """Reachability is never equivalent to a validated or decoded video stream."""
     import socket
     if not isinstance(form,dict):raise CloudError('Geçersiz bağlantı isteği.',400)
-    ip=_private_ipv4(str(form.get('ip','')).strip())
+    try:ip=_private_ipv4(str(form.get('ip','')).strip())
+    except (ValueError,TypeError):raise CloudError('Kamera IP adresi yerel IPv4 ağında olmalı.',400) from None
     protocol=form.get('protocol')
     if protocol not in ('onvif','rtsp','nvr','http','https'):
         raise CloudError('Bu bağlantı türü desteklenmiyor.',400)
@@ -156,9 +159,14 @@ def _vo_connect_check(form):
     if protocol=='onvif':
         try:
             _,_,_,_,profiles=_onvif_profiles(form)
-            return {'reachable':True,'stream_verified':False,'profiles':profiles,
+            return {'reachable':True,'stream_verified':False,'profiles':[dict(p,mode='media1') for p in profiles],
                     'code':'profiles','help':'ONVIF profilleri okundu. Bir video profili seçip görüntü bağlantısını başlatın; canlı görüntü ayrıca doğrulanacak.'}
         except Exception:
+            try:
+                _,_,_,_,profiles=_vo_media2_profiles(form)
+                return {'reachable':True,'stream_verified':False,'profiles':profiles,
+                        'code':'profiles','help':'ONVIF Media2 (Profile T) profilleri okundu. Video profili seçip görüntü bağlantısını başlatın.'}
+            except Exception:pass
             return {'reachable':True,'stream_verified':False,'profiles':[],
                     'code':'onvif_auth','help':'Ağ bağlantısı var ancak ONVIF Media1 profilleri okunamadı. Kamera hesabını, ONVIF ayarını ve cihaz saatini kontrol edin. Gerekirse RTSP/NVR ile ekleyin.'}
     if protocol in ('rtsp','nvr'):
