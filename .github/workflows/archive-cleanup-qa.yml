@@ -1,0 +1,49 @@
+name: Archive cleanup safety
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'qa/archive-cleanup/**'
+      - '.github/workflows/archive-cleanup-qa.yml'
+      - 'release-input/**'
+      - 'setup-input/**'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify deleted files against preserved release assets and references
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, subprocess
+          from pathlib import Path
+          m=json.loads(Path('qa/archive-cleanup/manifest.json').read_text())
+          def git(*args):
+              return subprocess.check_output(['git',*args])
+          deleted=set(git('diff','--name-only','--diff-filter=D',m['base'],'HEAD').decode().splitlines())
+          planned={f['path'] for f in m['files']}
+          assert deleted==planned, (deleted-planned,planned-deleted)
+          print('Only explicitly inventoried ZIP files removed:',len(deleted))
+          releases={}
+          for f in m['files']:
+              path=f['path']
+              old=git('show',m['base']+':'+path)
+              assert len(old)==f['size'] and hashlib.sha256(old).hexdigest()==f['sha256'],path+' differs from published release'
+              if f['tag'] not in releases:
+                  releases[f['tag']]=json.loads(subprocess.check_output(['gh','api','repos/'+__import__('os').environ['GITHUB_REPOSITORY']+'/releases/tags/'+f['tag']]))
+              release=releases[f['tag']]
+              assert not release['draft'] and not release['prerelease']
+              assert any(a['name']==f['asset'] and a['size']==f['size'] and a['digest']=='sha256:'+f['sha256'] for a in release['assets']),path+' release missing'
+              scan=subprocess.run(['git','grep','-I','-n','-F',path,'--',':!qa/archive-cleanup/manifest.json'],capture_output=True,text=True)
+              assert scan.returncode==1,(path,scan.stdout,scan.stderr)
+              print('Verified preserved',path, f['sha256'])
+          for keep in ('release-input/v0.13.0.zip','setup-input/v0.13.0.zip','release-input/v0.12.9.zip','setup-input/v0.12.9.zip','release-input/v0.12.7.zip','setup-input/v0.12.7.zip','release-input/v0.9.5.zip','setup-input/v0.9.5.zip'):
+              assert Path(keep).is_file(), keep
+          print('All candidate copies verified; active and recovery inputs preserved.')
+          PY
