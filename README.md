@@ -4,6 +4,11 @@
 **Windows installer:** https://github.com/furkovskii/visionops-ai-studio-updates/releases/latest/download/VisionOps_AI_Studio_Setup.zip  
 **Windows updates:** Published as `VisionOps_AI_Studio_update.zip` in GitHub Releases.
 
+## Current desktop release — v0.13.2
+- Live Pet/Cafe/Farm camera analytics use the tested anonymous tracking engine, with debounced region transitions and observed-only durations.
+- Windows and Linux tracking regression: 11/11 on each platform. Real camera/YOLO accuracy and the isolated decoder candidate remain under evaluation.
+- Older published installation/update files remain in [Releases](https://github.com/furkovskii/visionops-ai-studio-updates/releases). Duplicate historical build-input archives can be removed from the current tree after checksum and dependency verification; pinned build/recovery inputs remain. Git history is retained.
+
 ## Version v0.8.0
 - Workspace chooser displayed at application startup: Pet, Café, Farm.
 - Pet dashboard only opens after Supabase account entitlement check; Café and Farm remain previews.
@@ -14,8 +19,8 @@
 
 ## How updates are published (developer only)
 GitHub Actions workflow: `.github/workflows/publish-visionops.yml`. Upload versioned ZIP archives to:
-- `release-input/v0.8.0.zip` → update file.
-- `setup-input/v0.8.0.zip` → fresh setup file.
+- `release-input/vMAJOR.MINOR.PATCH.zip` → update file.
+- `setup-input/vMAJOR.MINOR.PATCH.zip` → fresh setup file.
 
 The workflow checks the internal version and releases the archives with the exact filenames expected by the app. The supplied Windows publisher uploads both files via GitHub CLI. App users just select “Check for updates” inside VisionOps.
 
