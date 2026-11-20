@@ -70,6 +70,9 @@
 #vo-connect-manual-slot .wall-add{margin:0}
 @media(max-width:720px){.vo-help-grid{grid-template-columns:1fr}.vo-scanning{gap:12px;padding:16px 12px}.vo-radar{width:57px;height:57px}.vo-scanning-text strong{font-size:15px}}
 @media(prefers-reduced-motion:reduce){.vo-radar:before,.vo-radar:after,.vo-loading-line span{animation:none!important}}
+.vo-stream-details{grid-column:1 / -1;padding:8px 12px;border-radius:10px;background:rgba(132,112,175,.08);border:1px solid var(--stroke,#595466)}
+.vo-stream-details summary{cursor:pointer;font-size:12px;line-height:1.5}
+.vo-stream-details label{margin-top:10px}
 </style>
 <div class="vo-connect-header"><div><h3>VisionOps Connect · Akıllı kamera kurulumu</h3><p class="vo-connect-hint">Önce kameraları bul, sonra bağlantı yetkisini doğrula. RTSP adresi tek başına görüntünün açıldığını kanıtlamaz.</p></div><button type="button" class="btn primary" id="vo-connect-scan">1 · Kameraları Bul</button></div>
 <ol class="vo-connect-stepper" id="vo-connect-steps" aria-label="Kamera ekleme adımları"><li data-state="active"><b>1</b> Kamerayı bul</li><li data-state="pending"><b>2</b> Erişimi doğrula</li><li data-state="pending"><b>3</b> Görüntüyü başlat</li></ol>
@@ -105,7 +108,14 @@
 <label>Kamera adı<input id="vo-connect-label" required maxlength="40" autocomplete="off"></label>
 <label>Kamera kullanıcı adı<input id="vo-connect-user" maxlength="128" autocomplete="off"></label>
 <label>Kamera parolası<input id="vo-connect-pass" type="password" maxlength="256" autocomplete="new-password"></label>
+<label id="vo-connect-brand-wrap" hidden>Kamera markası<select id="vo-connect-device-brand">
+<option value="auto">Bilmiyorum — önerilen ayarla başla</option><option value="tapo">TP-Link Tapo</option>
+<option value="mercusys">Mercusys</option><option value="hikvision">Hikvision / HiLook</option>
+<option value="dahua">Dahua</option><option value="imou">Imou</option><option value="reolink">Reolink</option>
+<option value="other">Diğer marka (gelişmiş ayarlar)</option></select></label>
+<details id="vo-connect-stream-details" class="vo-stream-details" hidden><summary>Gelişmiş görüntü bağlantısı ayarları</summary>
 <label id="vo-connect-path-wrap" hidden>RTSP yayın yolu<input id="vo-connect-path" maxlength="512" placeholder="/stream1" autocomplete="off"></label>
+<p class="vo-connect-hint">Yayın yolu kameranın modeline göre değişebilir. Hazır marka ayarları öneridir, gerçek görüntü bağlantısı ayrıca doğrulanır.</p></details>
 <label id="vo-connect-profile-wrap" hidden>ONVIF video profili<select id="vo-connect-profile"><option value="">Önce bağlantıyı denetle</option></select></label>
 </div>
 <label class="vo-connect-hint"><input id="vo-connect-remember" type="checkbox" checked> Kamerayı bu Windows hesabında güvenli biçimde kaydet</label>
