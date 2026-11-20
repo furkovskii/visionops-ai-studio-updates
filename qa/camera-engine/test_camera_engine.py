@@ -79,9 +79,12 @@ class CameraEngineTests(unittest.TestCase):
             finally:stop.set();worker.join(3)
         self.assertFalse(worker.is_alive());self.assertEqual(cam['status'],'Durduruldu');self.assertIsNone(cam['frame']);self.assertTrue(all(d.closed for d in opens))
     def test_real_four_mjpeg_decoders(self):
+        import tempfile, subprocess
+        request_count=[]
         class Handler(BaseHTTPRequestHandler):
             def log_message(self,*args):pass
             def do_GET(self):
+                request_count.append(self.path)
                 self.send_response(200);self.send_header('Content-Type','multipart/x-mixed-replace; boundary=frame');self.end_headers()
                 try:
                     for i in range(400):
@@ -89,6 +92,26 @@ class CameraEngineTests(unittest.TestCase):
                 except (OSError,ConnectionError):pass
         srv=ThreadingHTTPServer(('127.0.0.1',0),Handler);srv.daemon_threads=True
         thread=threading.Thread(target=srv.serve_forever,daemon=True);thread.start(); captures=[]; errors=[];lock=threading.Lock()
+        # A single direct network probe pinpoints Windows backend startup vs. IPC.
+        # Keep the actual four-stream test and production deadlines unchanged.
+        if os.name=='nt':
+            probe = """
+import sys, time, cv2
+start=time.monotonic()
+print('OpenCV',cv2.__version__,'FFMPEG available',cv2.videoio_registry.hasBackend(cv2.CAP_FFMPEG),flush=True)
+cap=cv2.VideoCapture(sys.argv[1],cv2.CAP_FFMPEG,[cv2.CAP_PROP_OPEN_TIMEOUT_MSEC,5000,cv2.CAP_PROP_READ_TIMEOUT_MSEC,5000])
+print('open',cap.isOpened(),'elapsed',time.monotonic()-start,flush=True)
+if cap.isOpened():
+    ok,frame=cap.read()
+    print('read',ok,'elapsed',time.monotonic()-start,'shape',None if frame is None else frame.shape,flush=True)
+cap.release()
+"""
+            try:
+                one=subprocess.run([sys.executable,'-u','-c',probe,f'http://127.0.0.1:{srv.server_port}/diagnostic'],capture_output=True,text=True,timeout=18)
+                print('WINDOWS DIRECT PROBE:',one.returncode,one.stdout,one.stderr,flush=True)
+            except subprocess.TimeoutExpired as exc:
+                print('WINDOWS DIRECT PROBE timed out:',exc.stdout,exc.stderr,flush=True)
+            print('FIXTURE requests',request_count,flush=True)
         def connect(i):
             try:
                 c=_IsolatedNetworkCapture(f'http://127.0.0.1:{srv.server_port}/camera{i}',threading.Event(),deadline_seconds=9)
@@ -99,6 +122,7 @@ class CameraEngineTests(unittest.TestCase):
         try:
             for t in threads:t.start()
             for t in threads:t.join(12)
+            print('FOUR-STREAM requests',request_count,'errors',errors,flush=True)
             self.assertFalse(errors,errors);self.assertEqual(len(captures),4)
             for c in captures:self.assertEqual(c.initial.shape,(64,96,3));self.assertTrue(c.read()[0])
             c=captures[0];c.proc.kill();c.proc.wait();self.assertTrue(c.done.wait(2))
