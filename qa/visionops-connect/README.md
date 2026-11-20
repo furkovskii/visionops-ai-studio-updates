@@ -13,7 +13,7 @@ RTSP is a stream protocol, and cloud/P2P-only products may not expose either.
 - Default scan: UDP 239.255.255.250:3702 WS-Discovery on detected private IPv4 interfaces,
   matched one-time MessageID, same-IP host validation, XML size/entity rejection, 64 entries max.
 - **Opt-in only** expanded scan: no credential guessing, up to two locally derived /24
-  networks, TCP/RTSP port 554 only, at most 508 addresses and 32 findings. Enterprise admins
+  networks, TCP/RTSP ports 554/8554 only, at most 508 addresses and 32 findings. Enterprise admins
   should opt out where network scanning is prohibited.
 - Untrusted ONVIF services cannot redirect or point clients at a different IP, WAN, loopback
   or metadata address. Only the discovered local IPv4 host may supply HTTP(S) and RTSP URLs.
