@@ -129,7 +129,8 @@ def _vo_scan_rtsp():
     if not hosts:return []
     found=[]
     def check(ip):
-        if _vo_probe_rtsp(ip,554,.35):return dict(ip=ip,port=554,path='',scheme='rtsp',discovered_via='rtsp')
+        for port in (554,8554):
+            if _vo_probe_rtsp(ip,port,.3):return dict(ip=ip,port=port,path='',scheme='rtsp',discovered_via='rtsp')
         return None
     with concurrent.futures.ThreadPoolExecutor(max_workers=24) as pool:
         for item in pool.map(check,hosts):
