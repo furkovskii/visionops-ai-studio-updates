@@ -68,8 +68,8 @@ class ConnectTests(unittest.TestCase):
         with mock.patch.dict(globals(),{'_vo_interfaces':lambda:['192.168.19.5'],'_vo_probe_rtsp':fake}):
             devices=_vo_scan_rtsp()
         self.assertEqual(len(devices),1);self.assertEqual(devices[0]['ip'],'192.168.19.20')
-        self.assertTrue(all(ip.startswith('192.168.19.') and port==554 for ip,port in calls))
-        self.assertLessEqual(len(calls),254)
+        self.assertTrue(all(ip.startswith('192.168.19.') and port in (554,8554) for ip,port in calls))
+        self.assertLessEqual(len(calls),508)
     def test_check_denies_external_ip(self):
         with mock.patch('socket.create_connection') as conn:
             with self.assertRaises(CloudError):_vo_connect_check({'ip':'9.9.9.9','protocol':'rtsp'})
