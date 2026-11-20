@@ -9,6 +9,8 @@ TREE=ast.parse(SOURCE.read_text(encoding='utf-8'))
 WANT={'_vo_interfaces','_discover_onvif','_vo_scan_rtsp','visionops_connect_scan'}
 NODES=[n for n in TREE.body if getattr(n,'name',None) in WANT]
 assert len(NODES)==len(WANT)
+for node in NODES:
+    if isinstance(node,ast.FunctionDef):node.decorator_list=[]
 exec(compile(ast.Module(body=NODES,type_ignores=[]),str(SOURCE),'exec'),globals())
 class CloudError(Exception):pass
 _VO_FALLBACK_LOCK=threading.Lock()
