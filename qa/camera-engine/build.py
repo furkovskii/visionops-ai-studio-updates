@@ -27,6 +27,42 @@ def change(rel, data):
     else:s='{"version": "0.13.1"}\n'
     result=s.encode('utf-8')
     assert hashlib.sha256(result).hexdigest()==EXPECTED[rel], (rel,hashlib.sha256(result).hexdigest())
+    if rel=='app.py':
+        # Keep the previous exact-candidate hash gate above. Apply one narrowly
+        # scoped runtime fix only after that gate, not a test-only workaround.
+        original = """def parent_watch():
+    try: sys.stdin.buffer.read(1)
+    finally: os._exit(0)"""
+        revised = """def parent_watch():
+    if os.name == 'nt':
+        # A blocking read of Python's buffered stdin during OpenCV/FFmpeg
+        # initialization can contend with Windows stdio/CRT locks. Monitor the
+        # actual parent process instead; no stdin access after the config line.
+        import ctypes
+        from ctypes import wintypes
+        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+        kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        kernel.OpenProcess.restype = wintypes.HANDLE
+        kernel.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+        kernel.WaitForSingleObject.restype = wintypes.DWORD
+        kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+        kernel.CloseHandle.restype = wintypes.BOOL
+        parent = kernel.OpenProcess(0x00100000, False, os.getppid())
+        if not parent: os._exit(3)
+        try:
+            status = kernel.WaitForSingleObject(parent, 0xffffffff)
+        finally:
+            kernel.CloseHandle(parent)
+        os._exit(0 if status == 0 else 3)
+    try: sys.stdin.buffer.read(1)
+    finally: os._exit(0)"""
+        s=one(s,original,revised)
+        result=s.encode('utf-8')
+        # Compile the embedded child too: the surrounding app compilation alone
+        # cannot catch syntax errors inside a raw Python source string.
+        child=next(n.value.value for n in ast.parse(s).body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='_NETWORK_CAPTURE_CHILD' for t in n.targets))
+        compile(child,'network_decoder','exec')
+        print('Windows decoder watchdog patched; app SHA-256:',hashlib.sha256(result).hexdigest())
     return result
 for folder,name,digest in [('release-input','VisionOps_AI_Studio_update.zip','469711d2d36b619feeb44a8350034fd563c691f8563a0df9dad036373a5882de'),('setup-input','VisionOps_AI_Studio_Setup.zip','2a4cf84a5fc7749ff2b4b8ea315334056e248879dc53331cb503961fd32eff9a')]:
     src=ROOT/folder/'v0.13.0.zip'
@@ -44,4 +80,4 @@ for folder,name,digest in [('release-input','VisionOps_AI_Studio_update.zip','46
         assert z.testzip() is None
         assert json.loads(z.read(PREFIX+'version.json'))['version']=='0.13.1'
         if folder=='setup-input':z.extractall(OUT)
-print('Verified exact changed-source hashes and both archives')
+print('Verified original candidate hashes, scoped watchdog patch and both archives')
