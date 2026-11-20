@@ -1,6 +1,7 @@
 import ast, uuid, unittest, math, tempfile, sqlite3, json
 from pathlib import Path
 from datetime import datetime
+from contextlib import closing
 HERE=Path(__file__).resolve().parent
 ROOT=HERE.parents[1] if HERE.parent.name=='qa' else HERE
 source=ROOT/'ai-qa-build'/'VisionOps_AI_Studio'/'app.py'
@@ -78,8 +79,8 @@ class TrackingTests(unittest.TestCase):
             DATA_DIR=Path(d)
             camera={'module':'farm','owner':'aaa','id':'cam','config':{'auto':True}}
             _wall_record(camera,[('Hareket analizi','Hareketsizlik adayı','abc','İnek',30)],[('İnek',.5,.5)],30)
-            with _wall_db('farm','aaa') as c:
+            with closing(_wall_db('farm','aaa')) as c:
                 row=c.execute('select event,seconds from observations').fetchone();self.assertEqual(tuple(row),('Hareketsizlik adayı',30.))
-            with _wall_db('farm','bbb') as c:self.assertEqual(c.execute('select count(*) from observations').fetchone()[0],0)
+            with closing(_wall_db('farm','bbb')) as c:self.assertEqual(c.execute('select count(*) from observations').fetchone()[0],0)
             self.assertEqual(_wall_insights('farm','aaa','cam')['daily'][-1]['samples'],1)
 if __name__=='__main__':unittest.main(verbosity=2)
