@@ -1,0 +1,42 @@
+name: VisionOps Connect v0.13.4 camera onboarding QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'qa/visionops-connect/**'
+      - '.github/workflows/visionops-connect-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  onboarding:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify previous 0.13.3 baseline and rebuild Connect 0.13.4
+        run: python qa/visionops-connect/build.py
+      - name: Test network safety and multi-vendor ONVIF Media1 and Media2 onboarding
+        run: python qa/visionops-connect/test_connect.py
+      - name: Validate wizard script
+        shell: bash
+        run: node --check - < qa/visionops-connect/wizard.js.inc
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: VisionOps-Connect-v0.13.4-QA
+          path: |
+            connect-qa-build/VisionOps_AI_Studio_update.zip
+            connect-qa-build/VisionOps_AI_Studio_Setup.zip
+          if-no-files-found: error
+          retention-days: 14
