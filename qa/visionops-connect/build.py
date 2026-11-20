@@ -15,8 +15,8 @@ def patch_app(s):
     a=s.index('def _discover_onvif(timeout=3.0):');b=s.index('\ndef _onvif_soap(',a)
     s=s[:a]+inc('discovery.py.inc')+'\n'+s[b:]
     # Media2 (Profile T) SOAP namespace is opt-in, no dynamic endpoint expansion.
-    s=one(s,"        'xmlns:tt=\"http://www.onvif.org/ver10/schema\">',",
-          "        'xmlns:tr2=\"http://www.onvif.org/ver20/media/wsdl\" '\n        'xmlns:tt=\"http://www.onvif.org/ver10/schema\">',")
+    s=one(s,"        'xmlns:tt=\"http://www.onvif.org/ver10/schema\">'",
+          "        'xmlns:tr2=\"http://www.onvif.org/ver20/media/wsdl\" '\n        'xmlns:tt=\"http://www.onvif.org/ver10/schema\">'")
     a=s.index('def _onvif_source(form):');b=s.index('\ndef _camera_store_path(',a)
     s=s[:a]+inc('media2.py.inc')+'\n\n'+s[b:]
     s=one(s,"@app.post('/api/workspace/onvif/discover')",
