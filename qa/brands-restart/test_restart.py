@@ -32,6 +32,7 @@ class RestartTests(unittest.TestCase):
         self.assertLess(d.index("version=stage_package"),d.index("automatic=_vo_request_desktop_restart()"))
         self.assertLess(m.index("version=stage_package"),m.index("automatic=_vo_request_desktop_restart()"))
         self.assertIn("automatic_restart",d)
+        self.assertIn("auto_restart_supported",s)
         self.assertIn("automatic_restart",m)
         self.assertIn("if not admin():",d)
         self.assertIn("if not admin():",m)
@@ -83,6 +84,11 @@ class RestartTests(unittest.TestCase):
             kernel.WaitForSingleObject.return_value=258  # WAIT_TIMEOUT
             with self.assertRaises(RuntimeError):env['_vo_wait_for_previous_process'](5678)
         with self.assertRaises(RuntimeError):env['_vo_wait_for_previous_process'](1234)
+    def test_settings_message_follows_native_restart_capability(self):
+        js=(APP/'static'/'dashboard.js').read_text(encoding='utf-8')
+        self.assertIn('d.auto_restart_supported?',js)
+        self.assertIn('uygulama güvenle yeniden başlatılıyor',js)
+        self.assertNotIn("Uygulamayı kapatıp masaüstü simgesiyle tekrar açın.",js)
     def test_parent_wait_before_update_installation(self):
         s=(APP/'launcher.pyw').read_text(encoding='utf-8')
         self.assertLess(s.index("_vo_wait_for_previous_process(int(sys.argv[2]))"),
