@@ -1,4 +1,4 @@
-name: Publish VisionOps desktop update
+name: Publish JuniqOps desktop update
 on:
   push:
     branches: [main]
@@ -6,6 +6,7 @@ on:
       - '.github/workflows/publish-visionops.yml'
       - 'release-input/*.zip'
       - 'setup-input/*.zip'
+      - 'qa/branding/**'
       - 'VisionOps_AI_Studio/**'
   pull_request:
     branches: [main]
@@ -58,6 +59,19 @@ jobs:
             cp sceneflow-live-build/VisionOps_AI_Studio_update.zip release-input/v0.13.9.zip
             cp sceneflow-live-build/VisionOps_AI_Studio_Setup.zip setup-input/v0.13.9.zip
           fi
+      - name: Build JuniqOps v0.14.0 from signed v0.13.9 release inputs
+        if: github.event_name != 'workflow_run'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p brand-source
+          gh release download v0.13.9 --repo "$GITHUB_REPOSITORY" --pattern 'VisionOps_AI_Studio_update.zip' --dir brand-source
+          gh release download v0.13.9 --repo "$GITHUB_REPOSITORY" --pattern 'VisionOps_AI_Studio_Setup.zip' --dir brand-source
+          python3 qa/branding/build.py
+          python3 qa/branding/test_brand.py
+          cp juniqops-build/VisionOps_AI_Studio_update.zip release-input/v0.14.0.zip
+          cp juniqops-build/VisionOps_AI_Studio_Setup.zip setup-input/v0.14.0.zip
       - name: Validate package and determine version
         id: build
         shell: bash
@@ -186,10 +200,20 @@ jobs:
                 'Beta limitations: Requires working camera, enabled existing analysis and configured zones. No physical camera accuracy validation yet; no free-text-to-rule AI, no signed forensic accuracy evidence, and SceneFlow details are not yet synchronized to mobile. Existing mobile reports remain available separately.' \
                 '' \
                 "Update SHA256: $HASH" > release-notes.txt
+            elif [[ "$TAG" == "v0.14.0" ]]; then
+              printf '%s\n' \
+                'JuniqOps v0.14.0 — brand migration from VisionOps' \
+                '' \
+                '- Customer-visible product name, desktop interface and application icon changed to JuniqOps.' \
+                '- No camera, SceneFlow, data, Supabase profile, licence or security changes.' \
+                '- Existing installation directory, package paths and trusted updater filenames retained for compatibility.' \
+                '- Users with v0.13.9 can use the in-app Check for updates command.' \
+                '' \
+                "Update SHA256: $HASH" > release-notes.txt
             else
               printf '%s\n' "Desktop update. SHA256: $HASH" > release-notes.txt
             fi
-            gh release create "$TAG" "${files[@]}" --draft --target "$GITHUB_SHA" --title "VisionOps AI Studio $TAG" --notes-file release-notes.txt
+            gh release create "$TAG" "${files[@]}" --draft --target "$GITHUB_SHA" --title "JuniqOps $TAG" --notes-file release-notes.txt
           fi
           gh release view "$TAG" --json assets,isDraft
           mkdir -p release-verify
