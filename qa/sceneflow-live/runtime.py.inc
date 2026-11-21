@@ -98,7 +98,7 @@ def _sf_frame(camera,events,stamp,token):
             if not isinstance(raw,(tuple,list)) or len(raw)<4:continue
             zone,kind,_,label=raw[:4]
             event_type={'Giriş':'zone_enter','Çıkış':'zone_exit'}.get(kind)
-            if event_type and isinstance(label,str) and label.strip().casefold() in _SF_LABELS[module] and zone in zone_map:
+            if event_type and isinstance(label,str) and label.strip().replace('İ','i').replace('I','ı').casefold() in _SF_LABELS[module] and zone in zone_map:
                 previous['events'].append(Event(stamp-min(0.001,(stamp-last)/2),camera['id'],module,zone_map[zone],subject,event_type))
     cutoff=stamp-_SF_HISTORY_SECONDS
     previous['events']=[e for e in previous['events'] if e.timestamp>=cutoff]
@@ -126,7 +126,11 @@ def _sf_result(rule, state, now):
                 'validated_accuracy':None,'comparison':None,'proof_sha256':None}
     # A digest cannot be taken as model validity, only as local transcript fingerprint.
     comparison=compare(prior,current)
-    return {**current.public(),'comparison':{'enough_evidence':comparison.enough_evidence,
+    result=current.public()
+    if current.verdict=='unknown':
+        result['observed_events']=None
+        result['proof_sha256']=None
+    return {**result,'comparison':{'enough_evidence':comparison.enough_evidence,
        'relative_change':comparison.relative_change,'interpretation':comparison.interpretation},
        'observed_at':'işlenen kamera kareleri','measured_accuracy':None}
 
