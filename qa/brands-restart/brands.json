@@ -1,0 +1,107 @@
+[
+  {
+    "id": "vigi",
+    "label": "TP-Link VIGI",
+    "help": "VIGI kameralarında ONVIF/RTSP desteği birçok modelde bulunur. VIGI yönetiminde üçüncü taraf bağlantısını, yerel hesap yetkisini ve güncel cihaz yazılımını kontrol edin. Tekrar tarayın. Destek modele göre değişebilir."
+  },
+  {
+    "id": "axis",
+    "label": "Axis Communications",
+    "help": "Axis kameranın yerel ağda çalıştığını doğrulayın. Yetkili kullanıcı hesabını kontrol edin ve önce otomatik taramayı deneyin. Destekleyen modellerde RTSP için /axis-media/media.amp yolu kullanılabilir."
+  },
+  {
+    "id": "hanwha",
+    "label": "Hanwha Vision / Wisenet",
+    "help": "Wisenet cihazın yerel yönetim ekranında ONVIF erişimini ve sadece görüntüleme yetkili kullanıcıyı kontrol edin. Ardından tekrar tarayın. Menü adları firmware sürümüne göre değişebilir."
+  },
+  {
+    "id": "uniview",
+    "label": "Uniview / UNV",
+    "help": "Kamerada veya UNV kayıt cihazında üçüncü taraf erişim ve ONVIF/RTSP servis ayarlarını, kullanıcı izinlerini ve ağ erişimini kontrol edin. Kayıt cihazında kanal seçimi gerekebilir."
+  },
+  {
+    "id": "vivotek",
+    "label": "VIVOTEK",
+    "help": "Cihazın ağ arayüzünden ONVIF/RTSP desteğini ve yetkili görüntüleme hesabını kontrol edin. Aynı yerel ağda taramayı tekrar başlatın."
+  },
+  {
+    "id": "bosch",
+    "label": "Bosch Security",
+    "help": "Bosch IP kamerada ONVIF/RTSP servis ayarlarını ve kullanıcı erişimini yetkili yönetim panelinden doğrulayın. Kurumsal ağ veya VLAN erişimi gerekiyorsa ağ yöneticisine başvurun."
+  },
+  {
+    "id": "milesight",
+    "label": "Milesight",
+    "help": "Milesight kamera/NVR üzerinde ONVIF/RTSP erişimini ve görüntüleme yetkilerini doğrulayın. Ardından aynı yerel ağda tekrar tarayın; kanal bazında bağlantı gerekebilir."
+  },
+  {
+    "id": "tiandy",
+    "label": "Tiandy",
+    "help": "Tiandy cihazın yerel yayın özelliklerini ve ONVIF erişim iznini kontrol edin. Kamera/NVR hesabını kullanarak yeniden tarayın. Bağlantı özellikleri modele bağlıdır."
+  },
+  {
+    "id": "foscam",
+    "label": "Foscam",
+    "help": "Foscam uygulaması veya cihaz arayüzünde yerel RTSP/ONVIF desteğini model bazında doğrulayın; yalnızca üretici bulutundan çalışan modeller otomatik bağlanmayabilir."
+  },
+  {
+    "id": "amcrest",
+    "label": "Amcrest",
+    "help": "Amcrest IP kameranın yerel ağ ayarları üzerinden RTSP/ONVIF erişimini ve yetkili hesabı kontrol edin; ardından yeniden tarayın."
+  },
+  {
+    "id": "annke",
+    "label": "ANNKE",
+    "help": "ANNKE IP kamera veya DVR/NVR cihazının ONVIF/RTSP desteklediğini doğrulayın. Kanal erişimi ve görüntüleme hesabı tanımlıysa VisionOps ile tekrar tarayın."
+  },
+  {
+    "id": "ipro",
+    "label": "i-PRO / Panasonic",
+    "help": "i-PRO / Panasonic ağ kamerasının ONVIF/RTSP erişim ayarlarını, cihaz IP'sini ve erişim hesabını doğrulayın. Aynı yerel ağda yeniden tarayın."
+  },
+  {
+    "id": "geovision",
+    "label": "GeoVision",
+    "help": "GeoVision IP kamera veya kayıt cihazında açık yerel video yayını ve kullanıcı yetkisi olup olmadığını kontrol edin; gerekli kanalı seçip yeniden deneyin."
+  },
+  {
+    "id": "ubiquiti",
+    "label": "Ubiquiti UniFi Protect",
+    "help": "UniFi Protect sisteminde kameralar genellikle Protect konsolu üzerinden yönetilir. Yerel RTSP/RTSPS yayını mümkünse konsolda desteklenen kameranın akış ayarını kontrol edin; genel ONVIF keşfini her model için varsaymayın."
+  },
+  {
+    "id": "dlink",
+    "label": "D-Link",
+    "help": "D-Link modelinizde yerel RTSP/ONVIF akışı olup olmadığını kontrol edin. Bazı modeller yalnızca üretici uygulamasına erişim sunabilir."
+  },
+  {
+    "id": "tenda",
+    "label": "Tenda",
+    "help": "Tenda kamera modelinin yerel RTSP/ONVIF sunup sunmadığını üretici belgelerinden kontrol edin; destekleniyorsa kamera hesabı ve aynı ağ bağlantısıyla yeniden tarayın."
+  },
+  {
+    "id": "lorex",
+    "label": "Lorex",
+    "help": "Lorex kamera veya NVR sisteminin yerel RTSP/ONVIF kanalı açıp açmadığını model bazında doğrulayın. NVR üzerinde kanal erişimi ve hesap yetkileri gerekebilir."
+  },
+  {
+    "id": "swann",
+    "label": "Swann",
+    "help": "Swann DVR/NVR veya IP kamera modelinde yerel video yayını destekleniyorsa cihazın kanal erişim ayarlarını kontrol edin. Bazı bulut modellerinde doğrudan entegrasyon mümkün olmayabilir."
+  },
+  {
+    "id": "provision",
+    "label": "Provision-ISR",
+    "help": "Provision-ISR kamera veya kayıt cihazında ONVIF/RTSP yayınının etkinliğini ve görüntüleme hesabını kontrol edin. Kanallar NVR üzerinden eklenebilir."
+  },
+  {
+    "id": "hilook",
+    "label": "HiLook (ayrı marka seçimi)",
+    "help": "HiLook cihazda yönetici yetkisiyle ONVIF/RTSP servislerini doğrulayın. Bazı modellerde ONVIF kullanıcısı oluşturmak gerekir; doğru kullanıcıyı kullanarak yeniden tarayın."
+  },
+  {
+    "id": "avigilon",
+    "label": "Avigilon",
+    "help": "Avigilon kameranın veya kayıt cihazının üçüncü taraf ONVIF/RTSP desteğini model bazında kontrol edin. Kurumsal ağın ayrı VLAN/firewall kuralları erişimi kısıtlayabilir."
+  }
+]
