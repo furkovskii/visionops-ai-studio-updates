@@ -35,7 +35,7 @@ class RestartTests(unittest.TestCase):
         self.assertIn("automatic_restart",m)
         self.assertIn("if not admin():",d)
         self.assertIn("if not admin():",m)
-        self.assertEqual(s.count("_vo_request_desktop_restart()"),2)
+        self.assertEqual(s.count("automatic=_vo_request_desktop_restart()"),2)
     def test_gui_close_after_update_signal(self):
         import logging,time
         env={'logging':logging,'time':time}
