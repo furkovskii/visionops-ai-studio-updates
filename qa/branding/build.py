@@ -97,6 +97,9 @@ def repackage(name: str):
                     if isinstance(config.get(key), str):
                         config[key] = rename_visible(config[key])
                 value = (json.dumps(config, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+            elif item.filename.split(PREFIX, 1)[-1] in {"security.py", "secure_store.py", "update_manager.py", "requirements.txt"}:
+                # Stable security and update implementation: never mutate in a cosmetic release.
+                pass
             elif item.filename.endswith(TEXT_SUFFIXES) and not item.is_dir():
                 try:
                     decoded = value.decode("utf-8-sig")
