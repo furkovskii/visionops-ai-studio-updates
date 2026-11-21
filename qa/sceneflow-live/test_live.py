@@ -115,7 +115,7 @@ class SceneFlowIntegrationTests(unittest.TestCase):
   self.assertIn('nedensel',current['comparison']['interpretation'])
  def test_camera_selector_source_contract(self):
   body=ast.get_source_segment(source,next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='ip_cameras_api'))
-  print('SCENEFLOW_CAMERA_RESPONSE_CONTRACT',' || '.join(l.strip() for l in body.splitlines() if 'jsonify(' in l or 'return ' in l)[-1900:])
+  self.assertIn('return jsonify(cameras=',body)
   self.assertIn('request.method',body)
  def test_release_package_compatibility(self):
   path=ROOT/'sceneflow-live-build'
