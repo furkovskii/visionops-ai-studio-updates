@@ -1,0 +1,51 @@
+name: VisionOps v0.13.6 brands and secure restart QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'qa/brands-restart/**'
+      - '.github/workflows/brands-restart-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Rebuild v0.13.6 atop verified v0.13.5 update
+        run: python qa/brands-restart/build.py
+      - name: Test signed-update restart, native process ordering and brand selection
+        run: python qa/brands-restart/test_restart.py
+      - name: Simulate camera setup workflows and manufacturer options
+        shell: bash
+        run: |
+          node --check qa/brands-restart/test_brands.mjs
+          npm install --no-save --ignore-scripts jsdom@26.1.0
+          node qa/brands-restart/test_brands.mjs
+          node qa/connect-usability/test_wizard.mjs
+      - name: Test independent camera decoder and reconnection on Windows
+        if: runner.os == 'Windows'
+        run: |
+          python -m pip install numpy opencv-python
+          python qa/connect-usability/test_decoder.py
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: VisionOps-v0.13.6-QA
+          path: |
+            brands-restart-build/VisionOps_AI_Studio_update.zip
+            brands-restart-build/VisionOps_AI_Studio_Setup.zip
+          if-no-files-found: error
+          retention-days: 14
