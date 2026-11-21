@@ -99,7 +99,7 @@ def _sf_frame(camera,events,stamp,token):
             zone,kind,_,label=raw[:4]
             event_type={'Giriş':'zone_enter','Çıkış':'zone_exit'}.get(kind)
             if event_type and isinstance(label,str) and label.strip().casefold() in _SF_LABELS[module] and zone in zone_map:
-                previous['events'].append(Event(stamp,camera['id'],module,zone_map[zone],subject,event_type))
+                previous['events'].append(Event(stamp-min(0.001,(stamp-last)/2),camera['id'],module,zone_map[zone],subject,event_type))
     cutoff=stamp-_SF_HISTORY_SECONDS
     previous['events']=[e for e in previous['events'] if e.timestamp>=cutoff]
     previous['coverage']=[c for c in intervals if c.end>=cutoff]
