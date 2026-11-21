@@ -1,0 +1,43 @@
+name: SceneFlow desktop visual prototype QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'qa/sceneflow-desktop/**'
+      - '.github/workflows/sceneflow-desktop-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Rebuild inherited desktop and SceneFlow preview
+        run: python qa/sceneflow-desktop/build.py
+      - name: Verify original camera settings, privacy and desktop artifact parity
+        run: python qa/sceneflow-desktop/test_desktop.py
+      - name: Validate preview code syntax
+        shell: bash
+        run: node --check - < qa/sceneflow-desktop/preview.js.inc
+      - name: Reverify existing mobile-independent SceneFlow rules
+        run: python qa/sceneflow/test_sceneflow.py
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: SceneFlow-Desktop-v0.13.7-QA-UNRELEASED
+          path: |
+            sceneflow-desktop-build/VisionOps_AI_Studio_update.zip
+            sceneflow-desktop-build/VisionOps_AI_Studio_Setup.zip
+          retention-days: 7
