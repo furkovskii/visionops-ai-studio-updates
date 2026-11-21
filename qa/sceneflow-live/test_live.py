@@ -24,6 +24,7 @@ _SF_LABELS={'cafe': {'insan','kişi','person','human','people'},
 _SF_HISTORY_SECONDS=3900;_SF_MAX_EVENTS=12000;_SF_MAX_COVERAGE=5000
 _CAP=sf.CAPTURE
 CAPTURE=_CAP
+asdict=dataclasses.asdict
 _sf_hashlib=hashlib
 _sf_closing=contextlib.closing
 def _load_saved_cameras(module,owner):return {}
