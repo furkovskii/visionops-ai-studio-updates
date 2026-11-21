@@ -38,5 +38,5 @@
 <button type="button" id="vo-sf-save" class="vo-sf-primary" disabled>Kuralları kaydet</button>
 <button type="button" id="vo-sf-refresh" disabled>TruthMeter sonuçlarını yenile</button>
 </div>
-<p class="vo-sf-note">**Veri doğrulama:** Görüntünün kesilmesi veya analizin kapalı olması bir olayın gerçekleşmediği anlamına gelmez. TruthMeter gözlem kapsamını gösterir; algılama modelinin gerçek doğruluğu ayrıca test edilmeden yüzde olarak sunulmaz. ActionLab karşılaştırması kesin bir kazanç veya sebep-sonuç kanıtı değildir.</p>
+<p class="vo-sf-note"><strong>Veri doğrulama:</strong> Görüntünün kesilmesi veya analizin kapalı olması bir olayın gerçekleşmediği anlamına gelmez. TruthMeter gözlem kapsamını gösterir; algılama modelinin gerçek doğruluğu ayrıca test edilmeden yüzde olarak sunulmaz. ActionLab karşılaştırması kesin bir kazanç veya sebep-sonuç kanıtı değildir.</p>
 </div>
