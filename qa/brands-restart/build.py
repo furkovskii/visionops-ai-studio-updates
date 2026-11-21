@@ -41,6 +41,15 @@ def patch_update(s):
     s=one(s,old,new)
     old="return jsonify({'ok':True,'version':version,'message':'Güncelleme hazır. Uygulamayı kapatıp tekrar açın.'})"
     s=one(s,old,new)
+    s=one(s,"'pending':(data/'update_pending.json').exists()})",
+          "'pending':(data/'update_pending.json').exists(),"
+          "'auto_restart_supported':(os.name=='nt' and _DESKTOP_HOSTED)})")
+    return s
+def patch_dashboard(s):
+    s=one(s,"el('updateDetail').textContent='Uygulamayı kapatıp masaüstü simgesiyle tekrar açın.';",
+          "el('updateDetail').textContent=d.auto_restart_supported?"
+          "'Güncelleme doğrulandı; uygulama güvenle yeniden başlatılıyor…':"
+          "'Güncelleme hazır. Masaüstü uygulamasını yeniden açarak kurulumu tamamlayın.';")
     return s
 def patch_launcher(s):
     s=one(s,'try:\n    if not PYTHONW.is_file():',
@@ -75,10 +84,10 @@ for archive in ('VisionOps_AI_Studio_update.zip','VisionOps_AI_Studio_Setup.zip'
             assert item.filename.startswith(PREFIX) and '..' not in Path(item.filename).parts
             rel=item.filename[len(PREFIX):]
             data=old.read(item)
-            if rel in ('update_manager.py','launcher.pyw','studio.py','templates/activate.html'):
+            if rel in ('update_manager.py','launcher.pyw','studio.py','templates/activate.html','static/dashboard.js'):
                 text=data.decode('utf-8').replace('\r\n','\n').replace('\r','\n')
                 fn={'update_manager.py':patch_update,'launcher.pyw':patch_launcher,
-                    'studio.py':patch_studio,'templates/activate.html':patch_html}[rel]
+                    'studio.py':patch_studio,'templates/activate.html':patch_html,'static/dashboard.js':patch_dashboard}[rel]
                 data=fn(text).encode('utf-8')
             elif rel=='version.json': data=(json.dumps({'version':VERSION})+'\n').encode('utf-8')
             if rel.endswith(('.py','.pyw')):compile(data,rel,'exec')
