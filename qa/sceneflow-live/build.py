@@ -1,4 +1,4 @@
-"""Build VisionOps v0.13.7: local SceneFlow rules and TruthMeter, ActionLab.
+"""Build VisionOps v0.13.8: local SceneFlow rules and TruthMeter, ActionLab.
 Extends the v0.13.6 signed-release source. No new runtime dependencies,
 no camera credential persistence, no change to vendor ONVIF/RTSP driver.
 """
@@ -6,7 +6,7 @@ import ast,json,re,subprocess,sys,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]; HERE=Path(__file__).resolve().parent
 OUT=ROOT/'sceneflow-live-build';OUT.mkdir(exist_ok=True)
-PREFIX='VisionOps_AI_Studio/';VERSION='0.13.7'
+PREFIX='VisionOps_AI_Studio/';VERSION='0.13.8'
 def src(name):return (HERE/name).read_text(encoding='utf-8')
 def once(text,old,new):
     count=text.count(old)
@@ -31,13 +31,18 @@ def patch_app(text):
     assert any(isinstance(n,ast.Name) and n.id=='_sf_scope_for' for n in ast.walk(entry))
     return text
 def patch_html(text):
+    # A self-contained, accessible customer command center before the existing live tools.
+    hero=src('command-hero.b64').strip()
+    panel=src('command-center.html.inc').replace('__VC_HERO_DATA__',hero)
+    assert '__VC_HERO_DATA__' not in panel and hero.startswith('UklGR')
+    text=once(text,'<section class="vo-scene"',panel+'\n<section class="vo-scene"')
     start=text.index('<section class="vo-scene"')
     stop=text.index('\n</section>',start)
     text=text[:stop]+'\n'+src('live-ui.html.inc')+text[stop:]
     # Inject beside already verified inline camera installation script.
     js=src('live-ui.js.inc').replace("'__SCENEFLOW_CSRF__'","{{ csrf|tojson }}")
     assert '__SCENEFLOW_CSRF__' not in js
-    text=once(text,'async function onvifRequest(path,body){',js+'\nasync function onvifRequest(path,body){')
+    text=once(text,'async function onvifRequest(path,body){',src('command-center.js.inc')+'\n'+js+'\nasync function onvifRequest(path,body){')
     return text
 subprocess.run([sys.executable,str(ROOT/'qa/sceneflow-desktop/build.py')],check=True,cwd=ROOT)
 subprocess.run([sys.executable,str(ROOT/'qa/sceneflow-desktop/test_desktop.py')],check=True,cwd=ROOT)
@@ -60,4 +65,4 @@ for package_name in ('VisionOps_AI_Studio_update.zip','VisionOps_AI_Studio_Setup
         if package_name.endswith('Setup.zip'):package.extractall(OUT)
 with zipfile.ZipFile(OUT/'VisionOps_AI_Studio_update.zip') as u,zipfile.ZipFile(OUT/'VisionOps_AI_Studio_Setup.zip') as s:
     for entry in u.namelist():assert u.read(entry)==s.read(entry),entry
-print('VisionOps SceneFlow v0.13.7 live-rule Windows update and installer prepared; no claim of physical camera calibration.')
+print('VisionOps SceneFlow v0.13.8 live-rule Windows update and installer prepared; no claim of physical camera calibration.')

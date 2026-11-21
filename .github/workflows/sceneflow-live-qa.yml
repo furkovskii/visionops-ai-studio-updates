@@ -1,4 +1,4 @@
-name: VisionOps 0.13.7 SceneFlow integrated desktop QA
+name: VisionOps 0.13.8 SceneFlow integrated desktop QA
 on:
   pull_request:
     branches: [main]
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Rebuild verified 0.13.6 base and SceneFlow integrated 0.13.7
+      - name: Rebuild verified 0.13.6 base and SceneFlow integrated 0.13.8
         run: python qa/sceneflow-live/build.py
       - name: Exercise SceneFlow integration and isolation regression
         run: python qa/sceneflow-live/test_live.py
@@ -35,12 +35,14 @@ jobs:
         shell: bash
         run: |
           node --check - < qa/sceneflow-live/live-ui.js.inc
+          node --check - < qa/sceneflow-live/command-center.js.inc
           node --check - < qa/sceneflow-desktop/preview.js.inc
       - name: Test interactive camera and rule wizard with a simulated local DOM
         shell: bash
         run: |
           npm install --no-save --ignore-scripts jsdom@26.1.0
           node qa/sceneflow-live/test_ui.mjs
+          node qa/sceneflow-live/test_command_ui.mjs
       - name: Recheck four-stream camera recovery on Windows
         if: runner.os == 'Windows'
         run: |
@@ -49,7 +51,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'
         with:
-          name: SceneFlow-integrated-0.13.7-Windows-QA
+          name: SceneFlow-integrated-0.13.8-Windows-QA
           path: |
             sceneflow-live-build/VisionOps_AI_Studio_update.zip
             sceneflow-live-build/VisionOps_AI_Studio_Setup.zip
