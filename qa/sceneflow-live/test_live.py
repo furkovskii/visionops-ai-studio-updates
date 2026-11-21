@@ -113,6 +113,12 @@ class SceneFlowIntegrationTests(unittest.TestCase):
   self.assertTrue(current['comparison']['enough_evidence'])
   self.assertEqual(current['comparison']['relative_change'],-100.)
   self.assertIn('nedensel',current['comparison']['interpretation'])
+ def test_camera_selector_source_contract(self):
+  start=source.index('def ip_cameras_api():')
+  stop=source.index("@app.post('/api/workspace/onvif/discover')",start)
+  body=source[start:stop]
+  print('SCENEFLOW_CAMERA_RESPONSE_CONTRACT',body[-1100:].replace('\\n',' '))
+  self.assertIn('request.method',body)
  def test_release_package_compatibility(self):
   path=ROOT/'sceneflow-live-build'
   with zipfile.ZipFile(path/'VisionOps_AI_Studio_update.zip') as update,zipfile.ZipFile(path/'VisionOps_AI_Studio_Setup.zip') as setup:
