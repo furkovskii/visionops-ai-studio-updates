@@ -1,4 +1,4 @@
-<!-- VisionOps AI customer command center / v0.13.8. Existing live camera UI remains below. -->
+<!-- VisionOps AI customer command center / v0.13.9. Existing live camera UI remains below. -->
 <section id="vo-command" class="vo-command" aria-labelledby="vo-command-title">
 <style>
 /* VisionOps AI brand: graphite / porcelain / oxide / signal / stone. Scoped: original operational tools preserved. */
@@ -22,6 +22,23 @@
 /* Make existing SceneFlow/TruthMeter panels visually coherent; do not interfere with their data controls */
 #vo-scene{background:#28271f!important;border-color:#6B6959!important;color:#F2EEE5!important}#vo-scene :is(h3,.vo-scene-eyebrow){color:#D3DD62!important}#vo-scene .vo-scene-steps,#vo-scene .vo-scene-side{background:#343129!important;border-color:#6B6959!important}#vo-scene .vo-scene-flow>div{background:#24231e!important;border-color:#6B6959!important}#vo-scene .vo-scene-flow>div:nth-child(2){background:#D3DD62!important}#vo-scene .vo-scene-flow>div:nth-child(2) :is(b,strong,span){color:#20201C!important}
 #vo-sf-live{border-color:#6B6959!important}#vo-sf-live :is(h4,.vo-sf-evidence strong){color:#D3DD62!important}#vo-sf-live .vo-sf-primary{background:#D3DD62!important;color:#20201C!important;border-color:#D3DD62!important}
+
+/* Customer-first utility surfaces. Values describe only real, authorized camera inventory. */
+.vc-tools{display:flex;align-items:end;flex-wrap:wrap;gap:10px;margin:12px 0}.vc-filter{display:grid;gap:8px;font-size:12px;font-weight:650;color:#d6d0c5;flex:1;min-width:180px}.vc-filter input{width:100%;height:44px;border:1px solid #88816b;background:#1b1b17;border-radius:8px;color:#f2eee5;padding:11px 12px;outline-offset:3px}.vc-filter input:focus{outline:2px solid #D3DD62}.vc-reload{min-height:44px;border:1px solid #D3DD62;border-radius:8px;color:#20201c;background:#D3DD62;padding:9px 14px;font-size:12px;font-weight:800}.vc-reload:disabled{opacity:.55;cursor:wait}
+.vc-last-checked{font-size:11px;color:#cbc2b2;line-height:1.6;min-height:20px}
+.vc-trust-intro{padding:23px;border-radius:12px;border:1px solid #817d64;background:linear-gradient(130deg,#38372c,#28271f);margin:16px 0}
+.vc-trust-intro>span{font-size:10px;letter-spacing:.16em;font-weight:850;color:#D3DD62}
+.vc-trust-intro h3{color:#F2EEE5;font-size:27px;letter-spacing:-.055em;line-height:1.1;margin:11px 0}.vc-trust-intro p{color:#d8d1c1;font-size:12px;line-height:1.7;margin:0;max-width:60ch}
+.vc-checkgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}
+.vc-checkgrid label{background:#302f27;border:1px solid #6B6959;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-height:150px;cursor:pointer}
+.vc-checkgrid label:has(input:checked){border-color:#D3DD62;background:#3c3c2e}
+.vc-checkgrid strong{color:#F2EEE5;font-size:13px;line-height:1.35}.vc-checkgrid span{color:#cabfb0;font-size:11px;line-height:1.65}
+.vc-checkgrid input{width:19px;height:19px;accent-color:#D3DD62}
+.vc-check-info{display:flex;align-items:center;gap:10px;font-size:12px;color:#D3DD62;margin:15px 0}
+.vc-check-info strong{font-variant-numeric:tabular-nums;font-size:19px}
+.vc-inline-links{display:flex;flex-wrap:wrap;gap:10px}.vc-inline-links a{display:inline-flex;align-items:center;justify-content:center;min-height:43px;padding:10px 13px;border:1px solid #989178;border-radius:8px;background:#34332b;color:#F2EEE5;font-size:12px;font-weight:750}.vc-inline-links a:hover{border-color:#D3DD62}
+@media(max-width:900px){.vc-checkgrid{grid-template-columns:1fr}.vc-checkgrid label{min-height:0}}
+
 @media(max-width:900px){.vc-shell{grid-template-columns:175px minmax(0,1fr)}.vc-hero{min-height:230px;padding:22px}.vc-view{padding:16px}.vc-summary{gap:8px}.vc-summary article{padding:12px}.vc-work{gap:9px}}
 @media(max-width:680px){.vc-shell{grid-template-columns:1fr}.vc-aside{padding:14px;gap:8px;border-right:0;border-bottom:1px solid #6B6959}.vc-aside .vc-help,.vc-tag{display:none}.vc-wordmark{font-size:17px}.vc-nav{display:flex;overflow:auto}.vc-nav button{flex:none;white-space:nowrap;padding:9px 12px}.vc-toolbar{min-height:51px;padding:11px 14px;flex-wrap:wrap}.vc-view{padding:13px}.vc-hero{min-height:260px;padding:17px}.vc-hero h2{font-size:37px}.vc-summary{grid-template-columns:1fr}.vc-work{grid-template-columns:1fr}.vc-camera-list{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.vo-command *{scroll-behavior:auto!important;transition:none!important}}
@@ -34,6 +51,7 @@
 <button type="button" role="tab" id="vc-tab-areas" aria-selected="false" aria-controls="vc-view-areas" data-vc-tab="areas" tabindex="-1">▦ &nbsp; Alanlar</button>
 <button type="button" role="tab" id="vc-tab-rules" aria-selected="false" aria-controls="vc-view-rules" data-vc-tab="rules" tabindex="-1">◇ &nbsp; Kurallar</button>
 <button type="button" role="tab" id="vc-tab-reports" aria-selected="false" aria-controls="vc-view-reports" data-vc-tab="reports" tabindex="-1">▥ &nbsp; Raporlar</button>
+<button type="button" role="tab" id="vc-tab-health" aria-selected="false" aria-controls="vc-view-health" data-vc-tab="health" tabindex="-1">✣ &nbsp; Ölçüm Hazırlığı</button>
 </nav><div class="vc-help">Her sekme tek bir iş içindir. Kamera bilgileri yalnızca bu bilgisayardaki yetkili oturumdan okunur. Bağımsız doğrulama yapılmamış doğruluk oranı gösterilmez.</div></aside>
 <div class="vc-main">
 <div class="vc-toolbar"><span>VISIONOPS AI / MÜŞTERİ PANELİ</span><span class="vc-status-pill"><i aria-hidden="true"></i> YEREL İŞ AKIŞI</span></div>
@@ -41,9 +59,21 @@
 <div class="vc-summary"><article><small>Kayıtlı kamera</small><strong id="vc-camera-count">—</strong><span id="vc-camera-status">Yetkili kamera listesi kontrol ediliyor.</span></article><article><small>Kamera gözlem kapsamı</small><strong>Bilinmiyor</strong><span>Bu özet ekranda bağımsız ölçüm yapılmıyor.</span></article><article><small>SceneFlow kural sonuçları</small><strong>Kamera seçin</strong><span>İlgili sonuçları kamera sekmesinden inceleyin.</span></article></div>
 <div class="vc-work"><a href="#vo-connect"><div>Kameraları yönet<span>IP kamera, bağlantı bilgileri ve canlı izleme</span></div><b aria-hidden="true">↗</b></a><a href="#vo-sf-live"><div>SceneFlow kuralları<span>Alan giriş–çıkış kurallarını kaydet ve doğrula</span></div><b aria-hidden="true">↗</b></a></div>
 <div class="vc-note">İzleme sonuçları için gerçek kamera, tanımlı alan ve çalışan analiz gerekir. Görsel örneği gerçek görüntü değildir.</div></div>
-<div class="vc-view" id="vc-view-cameras" role="tabpanel" aria-labelledby="vc-tab-cameras" hidden><h2 class="vc-subhead">Kameralar</h2><p class="vc-helptext">Bağlı veya kayıtlı kameraların listesini kontrol edin. Kamera kayıtlı olsa bile çevrimiçi olduğu garanti edilmez.</p><div id="vc-camera-list" class="vc-camera-list" aria-live="polite"><p class="vc-empty">Kamera listesi yükleniyor…</p></div><a class="vc-action" href="#vo-connect">IP kamera bağlantısını yönet ↗</a></div>
+<div class="vc-view" id="vc-view-cameras" role="tabpanel" aria-labelledby="vc-tab-cameras" hidden><h2 class="vc-subhead">Kameralar</h2><p class="vc-helptext">Bağlı veya kayıtlı kameraların listesini kontrol edin. Kamera kayıtlı olsa bile çevrimiçi olduğu garanti edilmez.</p><div class="vc-tools"><label class="vc-filter">Kayıtlı kamera ara<input id="vc-camera-search" type="search" maxlength="80" autocomplete="off" placeholder="Kamera adını yazın"></label><button id="vc-camera-reload" class="vc-reload" type="button">Listeyi yenile</button></div>
+<p class="vc-last-checked" id="vc-camera-updated" role="status">Henüz doğrulanmış kamera listesi yok.</p>
+<div id="vc-camera-list" class="vc-camera-list" aria-live="polite"><p class="vc-empty">Kamera listesi yükleniyor…</p></div><a class="vc-action" href="#vo-connect">IP kamera bağlantısını yönet ↗</a></div>
 <div class="vc-view" id="vc-view-areas" role="tabpanel" aria-labelledby="vc-tab-areas" hidden><h2 class="vc-subhead">Gözlem alanları</h2><p class="vc-helptext">Kamera görüntüsünde hangi alanın izleneceğini belirleyin. Giriş, kasa veya geçiş koridoru gibi alanlar, mevcut kamera ayarlarından tanımlanır. Görüntü dışında kalan alanların durumu bilinmez.</p><a class="vc-action" href="#vo-connect">Kamera analiz alanlarına git ↗</a></div>
 <div class="vc-view" id="vc-view-rules" role="tabpanel" aria-labelledby="vc-tab-rules" hidden><h2 class="vc-subhead">SceneFlow / TruthMeter / ActionLab</h2><p class="vc-helptext">Gözlem alanınızı seçin, giriş/çıkış eşiğinizi belirleyin. TruthMeter yeterli gözlemi olmayan dönemleri bilinmiyor olarak ayırır. ActionLab yalnızca yeterli veri bulunan dönemleri karşılaştırır.</p><a class="vc-action" href="#vo-sf-live">Yerel SceneFlow kurallarına git ↗</a></div>
 <div class="vc-view" id="vc-view-reports" role="tabpanel" aria-labelledby="vc-tab-reports" hidden><h2 class="vc-subhead">Raporlar ve gözlem özeti</h2><p class="vc-helptext">Raporlarda önce gözlemlenen süreyi, ardından olayları değerlendirin. Bu yeni sekme tek başına rapor üretmez; mevcut raporlarınız ve geçmiş verileriniz olduğu gibi korunur.</p><div class="vc-empty">Raporlarda doğrulanmamış başarı yüzdesi gösterilmez. Raporlar için mevcut uygulama bölümlerini kullanın.</div></div>
+<div class="vc-view" id="vc-view-health" role="tabpanel" aria-labelledby="vc-tab-health" hidden>
+<div class="vc-trust-intro"><span>TRUTHMETER / SAHA KONTROLÜ</span><h2 class="vc-subhead">Önce ölçümü hazırla.<br>Sonra sonuçları yorumla.</h2><p>Bu kontrol listesi kendi hazırlığınızı takip etmenize yardımcı olur. Kamera bağlantısını veya analiz başarısını otomatik olarak doğrulamaz. İşaretler yalnızca bu ekran açıkken tutulur.</p></div>
+<div class="vc-checkgrid" role="group" aria-label="Kamera ölçümü hazırlık kontrolleri">
+<label><input type="checkbox" data-vc-check="camera"><strong>01 · Kamerayı bağladım</strong><span>IP kamera üzerinden görüntüyü Windows uygulamasında gerçekten kontrol ettim.</span></label>
+<label><input type="checkbox" data-vc-check="area"><strong>02 · Gözlem alanını belirledim</strong><span>Giriş/çıkış çizgisinin görüntüde nerede olduğunu ve kör noktaları gözden geçirdim.</span></label>
+<label><input type="checkbox" data-vc-check="rule"><strong>03 · Kuralı denedim</strong><span>SceneFlow sonucu ve TruthMeter gözlem süresini birlikte inceledim.</span></label>
+</div><div class="vc-check-info" role="status"><strong id="vc-check-progress">0/3</strong><span>kullanıcının işaretlediği hazırlık adımı · doğruluk sertifikası değildir</span></div>
+<div class="vc-inline-links"><a href="#vo-connect">Kamera ayarlarını aç ↗</a><a href="#vo-sf-live">SceneFlow Lab'a git ↗</a></div>
+<div class="vc-note">Kamera kesintisi sıfır hareket demek değildir. Etiketli saha verisiyle gerçek doğruluk testi henüz yapılmadı. ActionLab yalnızca betimleyici dönem karşılaştırmasıdır.</div>
+</div>
 </div></div>
 </section>

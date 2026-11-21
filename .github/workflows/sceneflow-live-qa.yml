@@ -1,4 +1,4 @@
-name: VisionOps 0.13.8 SceneFlow integrated desktop QA
+name: VisionOps 0.13.9 SceneFlow integrated desktop QA
 on:
   pull_request:
     branches: [main]
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Rebuild verified 0.13.6 base and SceneFlow integrated 0.13.8
+      - name: Rebuild verified 0.13.6 base and SceneFlow integrated 0.13.9
         run: python qa/sceneflow-live/build.py
       - name: Exercise SceneFlow integration and isolation regression
         run: python qa/sceneflow-live/test_live.py
@@ -51,7 +51,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'
         with:
-          name: SceneFlow-integrated-0.13.8-Windows-QA
+          name: SceneFlow-integrated-0.13.9-Windows-QA
           path: |
             sceneflow-live-build/VisionOps_AI_Studio_update.zip
             sceneflow-live-build/VisionOps_AI_Studio_Setup.zip

@@ -1,33 +1,56 @@
-// Safe, isolated UI test against mocked authorized camera inventory. No live credentials.
+// Safe isolated Windows command center QA. Camera data is mocked, not a real camera test.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 const root=readFileSync(new URL('./command-center.html.inc',import.meta.url),'utf8').replace('__VC_HERO_DATA__','UklGRg==');
 const js=readFileSync(new URL('./command-center.js.inc',import.meta.url),'utf8');
 const dom=new JSDOM('<!doctype html><html><body>'+root+'</body></html>',{runScripts:'outside-only',url:'http://127.0.0.1/'});
-const w=dom.window,document=w.document;
+const w=dom.window,d=w.document;
 let requests=[];
-w.fetch=async (url,options)=>{requests.push({url,options});return {ok:true,json:async()=>({cameras:[
+w.fetch=async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>({cameras:[
  {id:'cam01',name:'Giriş'},
  {id:'cam02',name:'<img src=x onerror=alert(1)>'}
 ]})}};
 w.eval(js);
-await new Promise(r=>setTimeout(r,70));
+const flush=()=>new Promise(r=>setTimeout(r,70));
+await flush();
 assert.equal(requests.length,1);
 assert.equal(requests[0].url,'/api/workspace/ip-cameras');
 assert.equal(requests[0].options.credentials,'same-origin');
 assert.equal(requests[0].options.cache,'no-store');
-assert.equal(document.getElementById('vc-camera-count').textContent,'2');
-assert.equal(document.querySelector('#vc-camera-list').children.length,2);
-assert.equal(document.querySelector('#vc-camera-list img'),null,'camera names must never parse HTML');
-assert.match(document.querySelector('#vc-camera-list').textContent,/onerror=alert/);
-const tab=document.getElementById('vc-tab-cameras');tab.click();
+assert.equal(d.getElementById('vc-camera-count').textContent,'2');
+assert.equal(d.querySelector('#vc-camera-list').children.length,2);
+assert.equal(d.querySelector('#vc-camera-list img'),null,'camera names must never parse HTML');
+assert.match(d.querySelector('#vc-camera-list').textContent,/onerror=alert/);
+const tab=d.getElementById('vc-tab-cameras');tab.click();
 assert.equal(tab.getAttribute('aria-selected'),'true');
-assert.equal(document.getElementById('vc-view-cameras').hidden,false);
-assert.equal(document.getElementById('vc-view-overview').hidden,true);
+assert.equal(d.getElementById('vc-view-cameras').hidden,false);
+assert.equal(d.getElementById('vc-view-overview').hidden,true);
 const k=new w.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true});tab.dispatchEvent(k);
-assert.equal(document.getElementById('vc-tab-areas').getAttribute('aria-selected'),'true');
-assert.equal(document.querySelector('[href="#vo-sf-live"]')!==null,true,'real link to existing authorized SceneFlow');
-assert.equal(document.querySelector('[href="#vo-connect"]')!==null,true,'real link to existing camera UI');
-assert(!/\b98[.,]7\b/.test(root),'no invented accuracy KPI');
-console.log('VisionOps customer dashboard tabs, keyboard, authorized inventory and XSS safety passed');
+assert.equal(d.getElementById('vc-tab-areas').getAttribute('aria-selected'),'true');
+const health=d.getElementById('vc-tab-health');health.click();
+assert.equal(health.getAttribute('aria-selected'),'true');
+assert.equal(d.getElementById('vc-view-health').hidden,false);
+const checks=Array.from(d.querySelectorAll('[data-vc-check]'));
+assert.equal(checks.length,3);
+assert.equal(d.getElementById('vc-check-progress').textContent,'0/3');
+checks[0].checked=true;checks[0].dispatchEvent(new w.Event('change',{bubbles:true}));
+assert.equal(d.getElementById('vc-check-progress').textContent,'1/3');
+assert.match(d.getElementById('vc-view-health').textContent,/doğruluk sertifikası değildir/);
+tab.click();
+const search=d.getElementById('vc-camera-search');
+search.value='giriş';search.dispatchEvent(new w.Event('input',{bubbles:true}));
+assert.equal(d.querySelector('#vc-camera-list').children.length,1);
+assert.match(d.querySelector('#vc-camera-list').textContent,/Giriş/);
+search.value='olmayan';search.dispatchEvent(new w.Event('input',{bubbles:true}));
+assert.match(d.querySelector('#vc-camera-list').textContent,/Filtreyi temizleyin/);
+search.value='';search.dispatchEvent(new w.Event('input',{bubbles:true}));
+assert.equal(d.querySelector('#vc-camera-list').children.length,2);
+d.getElementById('vc-camera-reload').click();
+await flush();
+assert.equal(requests.length,2,'refresh uses the authorized same-origin API');
+assert.equal(d.getElementById('vc-camera-reload').disabled,false);
+assert.equal(d.querySelector('[href="#vo-sf-live"]')!==null,true,'real link to SceneFlow');
+assert.equal(d.querySelector('[href="#vo-connect"]')!==null,true,'real link to existing camera UI');
+assert(!/\\b98[.,]7\\b/.test(root),'no invented accuracy KPI');
+console.log('VisionOps 0.13.9 dashboard keyboard, filter, refresh, readiness and XSS safety passed');

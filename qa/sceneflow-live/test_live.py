@@ -120,7 +120,7 @@ class SceneFlowIntegrationTests(unittest.TestCase):
  def test_release_package_compatibility(self):
   path=ROOT/'sceneflow-live-build'
   with zipfile.ZipFile(path/'VisionOps_AI_Studio_update.zip') as update,zipfile.ZipFile(path/'VisionOps_AI_Studio_Setup.zip') as setup:
-   self.assertEqual(json.loads(update.read('VisionOps_AI_Studio/version.json'))['version'],'0.13.8')
+   self.assertEqual(json.loads(update.read('VisionOps_AI_Studio/version.json'))['version'],'0.13.9')
    for f in update.namelist():self.assertEqual(update.read(f),setup.read(f),f)
    html=update.read('VisionOps_AI_Studio/templates/activate.html').decode('utf-8')
    app=update.read('VisionOps_AI_Studio/app.py').decode('utf-8')

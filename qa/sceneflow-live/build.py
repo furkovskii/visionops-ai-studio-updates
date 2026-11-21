@@ -1,4 +1,4 @@
-"""Build VisionOps v0.13.8: local SceneFlow rules and TruthMeter, ActionLab.
+"""Build VisionOps v0.13.9: local SceneFlow rules and TruthMeter, ActionLab.
 Extends the v0.13.6 signed-release source. No new runtime dependencies,
 no camera credential persistence, no change to vendor ONVIF/RTSP driver.
 """
@@ -6,7 +6,7 @@ import ast,json,re,subprocess,sys,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]; HERE=Path(__file__).resolve().parent
 OUT=ROOT/'sceneflow-live-build';OUT.mkdir(exist_ok=True)
-PREFIX='VisionOps_AI_Studio/';VERSION='0.13.8'
+PREFIX='VisionOps_AI_Studio/';VERSION='0.13.9'
 def src(name):return (HERE/name).read_text(encoding='utf-8')
 def once(text,old,new):
     count=text.count(old)
@@ -65,4 +65,4 @@ for package_name in ('VisionOps_AI_Studio_update.zip','VisionOps_AI_Studio_Setup
         if package_name.endswith('Setup.zip'):package.extractall(OUT)
 with zipfile.ZipFile(OUT/'VisionOps_AI_Studio_update.zip') as u,zipfile.ZipFile(OUT/'VisionOps_AI_Studio_Setup.zip') as s:
     for entry in u.namelist():assert u.read(entry)==s.read(entry),entry
-print('VisionOps SceneFlow v0.13.8 live-rule Windows update and installer prepared; no claim of physical camera calibration.')
+print('VisionOps SceneFlow v0.13.9 live-rule Windows update and installer prepared; no claim of physical camera calibration.')
