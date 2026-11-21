@@ -46,15 +46,17 @@ jobs:
           cp old/VisionOps_AI_Studio_update.zip release-input/v0.9.6.zip
           gh release download v0.9.6 --repo "${{ github.repository }}" --pattern VisionOps_AI_Studio_Setup.zip --dir old || true
           if [ -f old/VisionOps_AI_Studio_Setup.zip ]; then cp old/VisionOps_AI_Studio_Setup.zip setup-input/v0.9.6.zip; fi
-      - name: Build and retest native auto-restart and camera brands v0.13.6
+      - name: Build and retest SceneFlow, TruthMeter and ActionLab v0.13.7
         if: github.event_name != 'workflow_run'
         run: |
           set -euo pipefail
-          if python3 -c 'from pathlib import Path; print(max((tuple(map(int,p.stem[1:].split("."))) for p in Path("release-input").glob("v*.zip")),default=(0,0,0)) <= (0,13,6))' | grep -qx True; then
-            python3 qa/brands-restart/build.py
-            python3 qa/brands-restart/test_restart.py
-            cp brands-restart-build/VisionOps_AI_Studio_update.zip release-input/v0.13.6.zip
-            cp brands-restart-build/VisionOps_AI_Studio_Setup.zip setup-input/v0.13.6.zip
+          if python3 -c 'from pathlib import Path; print(max((tuple(map(int,p.stem[1:].split("."))) for p in Path("release-input").glob("v*.zip")),default=(0,0,0)) <= (0,13,7))' | grep -qx True; then
+            python3 qa/sceneflow-live/build.py
+            python3 qa/sceneflow-live/test_live.py
+            python3 qa/sceneflow/test_sceneflow.py
+            node --check - < qa/sceneflow-live/live-ui.js.inc
+            cp sceneflow-live-build/VisionOps_AI_Studio_update.zip release-input/v0.13.7.zip
+            cp sceneflow-live-build/VisionOps_AI_Studio_Setup.zip setup-input/v0.13.7.zip
           fi
       - name: Validate package and determine version
         id: build
