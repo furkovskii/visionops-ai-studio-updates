@@ -46,17 +46,17 @@ jobs:
           cp old/VisionOps_AI_Studio_update.zip release-input/v0.9.6.zip
           gh release download v0.9.6 --repo "${{ github.repository }}" --pattern VisionOps_AI_Studio_Setup.zip --dir old || true
           if [ -f old/VisionOps_AI_Studio_Setup.zip ]; then cp old/VisionOps_AI_Studio_Setup.zip setup-input/v0.9.6.zip; fi
-      - name: Build and retest SceneFlow, TruthMeter and ActionLab v0.13.7
+      - name: Build and retest customer command center / SceneFlow v0.13.8
         if: github.event_name != 'workflow_run'
         run: |
           set -euo pipefail
-          if python3 -c 'from pathlib import Path; print(max((tuple(map(int,p.stem[1:].split("."))) for p in Path("release-input").glob("v*.zip")),default=(0,0,0)) <= (0,13,7))' | grep -qx True; then
+          if python3 -c 'from pathlib import Path; print(max((tuple(map(int,p.stem[1:].split("."))) for p in Path("release-input").glob("v*.zip")),default=(0,0,0)) <= (0,13,8))' | grep -qx True; then
             python3 qa/sceneflow-live/build.py
             python3 qa/sceneflow-live/test_live.py
             python3 qa/sceneflow/test_sceneflow.py
             node --check - < qa/sceneflow-live/live-ui.js.inc
-            cp sceneflow-live-build/VisionOps_AI_Studio_update.zip release-input/v0.13.7.zip
-            cp sceneflow-live-build/VisionOps_AI_Studio_Setup.zip setup-input/v0.13.7.zip
+            cp sceneflow-live-build/VisionOps_AI_Studio_update.zip release-input/v0.13.8.zip
+            cp sceneflow-live-build/VisionOps_AI_Studio_Setup.zip setup-input/v0.13.8.zip
           fi
       - name: Validate package and determine version
         id: build
@@ -170,11 +170,12 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "${files[@]}" --clobber
           else
-            if [[ "$TAG" == "v0.13.7" ]]; then
+            if [[ "$TAG" == "v0.13.8" ]]; then
               printf '%s\n' \
-                'VisionOps SceneFlow / TruthMeter / ActionLab — first local integration beta' \
+                'VisionOps AI v0.13.8 — customer command center visual update' \
                 '' \
-                '- Existing authorized camera analysis areas can now have up to eight saved anonymous entry/exit count rules per camera.' \
+                '- New visual customer dashboard with overview, cameras, areas, rules and report guidance; no fabricated KPIs.' \
+                '- Existing authorized camera analysis areas continue supporting up to eight anonymous entry/exit count rules per camera.' \
                 '- TruthMeter reports missing observation time as unknown, rather than treating camera outages as zero activity.' \
                 '- ActionLab shows descriptive adjacent-period event-rate comparisons only when both periods are sufficiently observed.' \
                 '- New inline SceneFlow Lab in the multi-camera setup panel; original ONVIF/RTSP discovery, existing analytics and Windows updater are retained.' \

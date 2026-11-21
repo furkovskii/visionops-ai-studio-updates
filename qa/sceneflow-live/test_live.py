@@ -120,15 +120,18 @@ class SceneFlowIntegrationTests(unittest.TestCase):
  def test_release_package_compatibility(self):
   path=ROOT/'sceneflow-live-build'
   with zipfile.ZipFile(path/'VisionOps_AI_Studio_update.zip') as update,zipfile.ZipFile(path/'VisionOps_AI_Studio_Setup.zip') as setup:
-   self.assertEqual(json.loads(update.read('VisionOps_AI_Studio/version.json'))['version'],'0.13.7')
+   self.assertEqual(json.loads(update.read('VisionOps_AI_Studio/version.json'))['version'],'0.13.8')
    for f in update.namelist():self.assertEqual(update.read(f),setup.read(f),f)
    html=update.read('VisionOps_AI_Studio/templates/activate.html').decode('utf-8')
    app=update.read('VisionOps_AI_Studio/app.py').decode('utf-8')
-   for marker in ('id="vo-connect"','id="vo-sf-camera"','id="vo-sf-save"','X-CSRF-Token',
+   for marker in ('id="vo-command"','id="vc-view-overview"','id="vc-view-cameras"','id="vc-view-rules"','id="vo-connect"','id="vo-sf-camera"','id="vo-sf-save"','X-CSRF-Token',
                   '/api/workspace/sceneflow/','id="vo-scene"'):
     self.assertIn(marker,html)
    self.assertIn('def sceneflow_api(camera_id)',app)
    self.assertIn('_sf_frame(camera,events,stamp,token)',app)
    self.assertIn('sf_state={}',app)
    self.assertNotIn('__SCENEFLOW_CSRF__',html)
+   self.assertNotIn('__VC_HERO_DATA__',html)
+   self.assertIn('data:image/webp;base64,UklGR',html)
+   self.assertIn('/api/workspace/ip-cameras',html)
 if __name__=='__main__':unittest.main(verbosity=2)
